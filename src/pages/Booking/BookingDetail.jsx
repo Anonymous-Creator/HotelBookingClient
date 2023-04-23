@@ -6,10 +6,14 @@ import { fetchGetBooking } from "../../store/bookingSlice/bookingSlice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useParams } from "react-router-dom";
 import OwlCarousel from "react-owl-carousel";
+import Swal from "sweetalert2";
+import storageService from "../../services/storage.service";
+import { fetchGetProductsByService } from "../../store/hotelServiceSlice/hotelServiceSlice";
 
 const BookingDetail = () => {
   const dispatch = useDispatch();
   const [booking, setBooking] = useState();
+  const [products, setProducts] = useState({});
   let { bookingId } = useParams();
 
   const user = useSelector((state) => state.user.value);
@@ -18,8 +22,22 @@ const BookingDetail = () => {
     (async () => {
       const result = await dispatch(fetchGetBooking(bookingId))
         .then(unwrapResult)
-        .then((originalPromiseResult) => {
-          console.log(originalPromiseResult.data);
+        .then(async (originalPromiseResult) => {
+          console.log(originalPromiseResult);
+          // console.log(originalPromiseResult.data);
+          for (let service of originalPromiseResult.data.services) {
+            const result = await dispatch(
+              fetchGetProductsByService(service.service.id)
+            )
+              .then(unwrapResult)
+              .then((originalPromiseResult) => {
+                if (originalPromiseResult.status == "SUCCESS") {
+                  products[service.service.id] =
+                    originalPromiseResult.data.items;
+                  setProducts(products);
+                }
+              });
+          }
           setBooking(originalPromiseResult.data);
           // handle result here
         })
@@ -182,6 +200,14 @@ const BookingDetail = () => {
                                 {service?.service?.title} X {service?.amount}
                               </h5>
                               {/* product render here */}
+                              <ul style={{ listStyle: "revert" }}>
+                                {products[service.service.id] &&
+                                  products[service.service.id].map(
+                                    (product) => {
+                                      return <li>{product.name}</li>;
+                                    }
+                                  )}
+                              </ul>
                             </div>
                           </li>
                         );
@@ -212,6 +238,51 @@ const BookingDetail = () => {
                     color: "#dfa974",
                     "font-weight": 500,
                     background: "transparent",
+                  }}
+                  onClick={async (e) => {
+                    console.log(bookingId);
+                    Swal.fire({
+                      title: "Note the reason",
+                      input: "text",
+                      inputAttributes: {
+                        autocapitalize: "off",
+                      },
+                      showCancelButton: true,
+                      confirmButtonText: "Enter",
+                      showLoaderOnConfirm: true,
+                      preConfirm: async (note) => {
+                        return await fetch(
+                          `${process.env.REACT_APP_API_URL}/api/v1/booking/cancel/${bookingId}?note=${note}`,
+                          {
+                            headers: {
+                              Authorization:
+                                "Bearer " + storageService.get("token"),
+                            },
+                            method: "POST",
+                          }
+                        )
+                          .then((response) => {
+                            console.log(response);
+                            if (!response.ok) {
+                              throw new Error(response.statusText);
+                            }
+                            return response.json();
+                          })
+                          .catch((error) => {
+                            Swal.showValidationMessage(
+                              `Request failed: ${error}`
+                            );
+                          });
+                      },
+                      // allowOutsideClick: () => !Swal.isLoading(),
+                    }).then((result) => {
+                      console.log("result", result);
+                      if (result.value.status == "SUCCESS") {
+                        Swal.fire("Cancel booking successfully", "", "success");
+                      } else {
+                        Swal.fire("Some error");
+                      }
+                    });
                   }}
                 >
                   Hủy phòng

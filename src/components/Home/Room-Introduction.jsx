@@ -17,13 +17,18 @@ const RoomIntroduction = ({ rooms }) => {
                     <div className="col-lg-3 col-md-6">
                       <div className="hp-room-item set-bg">
                         <img
-                          style={{ height: "100%" }}
+                          style={{ height: "100%", objectFit: "cover" }}
                           src={room.medias?.[0]?.url}
                         />
                         <div className="hr-text">
                           <h3>{room.title}</h3>
                           <h2>
-                            {room.price}$<span>/Pernight</span>
+                            {room.price.toLocaleString("it-IT", {
+                              style: "currency",
+                              currency: "VND",
+                            })}
+                            <span>/Pernight</span>
+                            {/* {room.price}$<span>/Pernight</span> */}
                           </h2>
                           <table>
                             <tbody>
@@ -33,11 +38,15 @@ const RoomIntroduction = ({ rooms }) => {
                               </tr>
                               <tr>
                                 <td className="r-o">Capacity:</td>
-                                <td>Max persion {room.maxNum}</td>
+                                <td>Max persion {room.capacity}</td>
                               </tr>
                               <tr>
-                                <td className="r-o">Floor:</td>
-                                <td>{room.floor}</td>
+                                <td className="r-o">Bed:</td>
+                                <td>{room.bed}</td>
+                              </tr>
+                              <tr>
+                                <td className="r-o">Size:</td>
+                                <td>{room.size}</td>
                               </tr>
                             </tbody>
                           </table>

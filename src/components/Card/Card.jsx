@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import adminFilter from "../../assets/img/admin/adminFilter.png";
 import admionSearchWhite from "../../assets/img/admin/admionSearchWhite.png";
 import excel from "../../assets/img/admin/excel.png";
@@ -8,10 +8,49 @@ import eye from "../../assets/img/admin/eye.png";
 import edit from "../../assets/img/admin/edit.png";
 import adminDelete from "../../assets/img/admin/adminDelete.png";
 import lock from "../../assets/img/admin/lock.png";
+import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
-const Card = ({ option, data, keys, deleteOption, deleteFlag }) => {
+import { MDBIcon } from "mdb-react-ui-kit";
+import {
+  fetchAddSaleToRoom,
+  fetchGetSales,
+} from "../../store/saleSlice/saleSlice";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { useDispatch } from "react-redux";
+import { fetchCheckoutBookingById } from "../../store/bookingSlice/bookingSlice";
+import BillModal from "../Modal/BillModal";
+const Card = ({
+  option,
+  data,
+  keys,
+  deleteOption,
+  revertOption,
+  deleteFlag,
+}) => {
+  const dispatch = useDispatch();
+  const [displayModal, setDisplayModal] = useState(false);
+  const [statusModal, setStatusModal] = useState("");
+  const [messageModal, setMessageModal] = useState("");
+  const [booking, setBooking] = useState({});
+  const [roomsSale, setRoomsSale] = useState([]);
+
+  const callback = () => {
+    setDisplayModal(false);
+    setStatusModal("");
+    setMessageModal("");
+  };
+
   return (
     <>
+      <BillModal
+        displayModal={displayModal}
+        statusModal={statusModal}
+        messageModal={messageModal}
+        booking={booking}
+        // displayStatus="true"
+        // message="Cập nhật thành công"
+        // status="success"
+      />
       <div className="card">
         <div className="card-body">
           <div className="table-top">
@@ -44,6 +83,86 @@ const Card = ({ option, data, keys, deleteOption, deleteFlag }) => {
             </div>
             <div className="wordset">
               <ul>
+                {option == "rooms" && (
+                  <li>
+                    <a
+                      style={{ color: "rebeccapurple" }}
+                      className="me-3 confirm-text"
+                      href="#"
+                      onClick={async () => {
+                        let sales;
+                        const func = fetchGetSales({
+                          deleteFlag: false,
+                        });
+                        const result = await dispatch(func)
+                          .then(unwrapResult)
+                          .then((originalPromiseResult) => {
+                            console.log(originalPromiseResult);
+                            if (originalPromiseResult.status == "SUCCESS") {
+                              sales = originalPromiseResult.data.items;
+                            }
+                          })
+                          .catch((rejectedValueOrSerializedError) => {
+                            console.log(rejectedValueOrSerializedError);
+                          });
+                        let salesObject = {};
+                        sales.forEach((sale) => {
+                          salesObject[sale.id] = `${sale.salePercent}% - ${
+                            sale.dayStart.split("T")[0]
+                          } đến ${sale.dayEnd.split("T")[0]}`;
+                        });
+
+                        const { value: fruit } = await Swal.fire({
+                          title: "Select sales",
+                          input: "select",
+                          inputOptions: {
+                            Sales: salesObject,
+                          },
+                          inputPlaceholder: "Select sale",
+                          showCancelButton: true,
+                          inputValidator: async (value) => {
+                            if (value) {
+                              const result = await dispatch(
+                                fetchAddSaleToRoom({
+                                  saleId: value,
+                                  // roomId: item["id"],
+                                })
+                              )
+                                .then(unwrapResult)
+                                .then((originalPromiseResult) => {
+                                  console.log(originalPromiseResult);
+                                  if (
+                                    originalPromiseResult.status == "SUCCESS"
+                                  ) {
+                                    Swal.fire(
+                                      "Thêm sale thành công",
+                                      "",
+                                      "success"
+                                    );
+                                  } else {
+                                    // Swal.fire(
+                                    //   originalPromiseResult.message,
+                                    //   "",
+                                    //   "error"
+                                    // );
+                                  }
+                                })
+                                .catch((rejectedValueOrSerializedError) => {
+                                  console.log(rejectedValueOrSerializedError);
+                                });
+                            }
+                          },
+                        });
+
+                        // if (fruit) {
+                        //   Swal.fire(`You selected: ${fruit}`);
+                        // }
+                      }}
+                    >
+                      <MDBIcon fas icon="plus-circle" />
+                    </a>
+                  </li>
+                )}
                 <li>
                   <a
                     data-bs-toggle="tooltip"
@@ -112,6 +231,11 @@ const Card = ({ option, data, keys, deleteOption, deleteFlag }) => {
             <table className="table datanew">
               <thead>
                 <tr>
+                  {option == "rooms" && (
+                    <th>
+                      <input type="checkbox" />
+                    </th>
+                  )}
                   {keys && keys.map((key) => <th>{key}</th>)}
                   <th>Settings</th>
                 </tr>
@@ -120,6 +244,18 @@ const Card = ({ option, data, keys, deleteOption, deleteFlag }) => {
                 {data &&
                   data.map((item, index) => (
                     <tr>
+                      {option == "rooms" && (
+                        <td>
+                          <input
+                            type="checkbox"
+                            onChange={(e) => {
+                              console.log(item);
+                              roomsSale.push(item.id);
+                              setRoomsSale(roomsSale);
+                            }}
+                          />
+                        </td>
+                      )}
                       {keys && keys.map((key) => <td>{item[key]}</td>)}
                       <td
                         style={{
@@ -132,15 +268,177 @@ const Card = ({ option, data, keys, deleteOption, deleteFlag }) => {
                           to={"/admin/update/" + option + "/" + item["id"]}
                           style={{ marginRight: "8px" }}
                         ></Link>
-                        {option == "bookings" && (
-                          <Link
-                            className="me-3"
-                            to={"/admin/update/" + option + "/" + item["id"]}
+                        {option == "rooms" && (
+                          <a
+                            className="me-3 confirm-text"
+                            href="#"
+                            onClick={async () => {
+                              let sales;
+                              const func = fetchGetSales({
+                                deleteFlag: false,
+                              });
+                              const result = await dispatch(func)
+                                .then(unwrapResult)
+                                .then((originalPromiseResult) => {
+                                  console.log(originalPromiseResult);
+                                  if (
+                                    originalPromiseResult.status == "SUCCESS"
+                                  ) {
+                                    sales = originalPromiseResult.data.items;
+                                  }
+                                })
+                                .catch((rejectedValueOrSerializedError) => {
+                                  console.log(rejectedValueOrSerializedError);
+                                });
+                              let salesObject = {};
+                              sales.forEach((sale) => {
+                                salesObject[sale.id] = `${
+                                  sale.salePercent
+                                }% - ${sale.dayStart.split("T")[0]} đến ${
+                                  sale.dayEnd.split("T")[0]
+                                }`;
+                              });
+
+                              const { value: fruit } = await Swal.fire({
+                                title: "Select sales",
+                                input: "select",
+                                inputOptions: {
+                                  Sales: salesObject,
+                                },
+                                inputPlaceholder: "Select sale",
+                                showCancelButton: true,
+                                inputValidator: async (value) => {
+                                  if (value) {
+                                    const result = await dispatch(
+                                      fetchAddSaleToRoom({
+                                        saleId: value,
+                                        roomId: [item["id"]],
+                                      })
+                                    )
+                                      .then(unwrapResult)
+                                      .then((originalPromiseResult) => {
+                                        console.log(originalPromiseResult);
+                                        if (
+                                          originalPromiseResult.status ==
+                                          "SUCCESS"
+                                        ) {
+                                          Swal.fire(
+                                            "Thêm sale thành công",
+                                            "",
+                                            "success"
+                                          );
+                                        } else {
+                                          // Swal.fire(
+                                          //   originalPromiseResult.message,
+                                          //   "",
+                                          //   "error"
+                                          // );
+                                        }
+                                      })
+                                      .catch(
+                                        (rejectedValueOrSerializedError) => {
+                                          console.log(
+                                            rejectedValueOrSerializedError
+                                          );
+                                        }
+                                      );
+                                  }
+                                },
+                              });
+
+                              // if (fruit) {
+                              //   Swal.fire(`You selected: ${fruit}`);
+                              // }
+                            }}
+                            style={{ marginRight: "12px" }}
                           >
-                            <img src={eye} alt="img" />
-                          </Link>
+                            <MDBIcon fas icon="plus-circle" />
+                          </a>
                         )}
-                        {option != "bookings" && (
+                        {option == "bookings" && (
+                          <>
+                            {item.status == "PENDING" && (
+                              <Link
+                                title="Xuât bill"
+                                onClick={() => {
+                                  Swal.fire({
+                                    title: "Bạn muốn xuát bill đặt phòng này",
+                                    // showDenyButton: true,
+                                    showCancelButton: true,
+                                    confirmButtonText: "Save",
+                                  }).then(async (result) => {
+                                    /* Read more about isConfirmed, isDenied below */
+                                    if (result.isConfirmed) {
+                                      const result = await dispatch(
+                                        fetchCheckoutBookingById({
+                                          bookingId: item.id,
+                                        })
+                                      )
+                                        .then(unwrapResult)
+                                        .then((originalPromiseResult) => {
+                                          console.log(originalPromiseResult);
+                                          if (
+                                            originalPromiseResult.status ==
+                                            "SUCCESS"
+                                          ) {
+                                            Swal.fire(
+                                              "Xuât bill thành công",
+                                              "",
+                                              "success"
+                                            );
+                                          } else {
+                                            Swal.fire(
+                                              originalPromiseResult.message,
+                                              "",
+                                              "error"
+                                            );
+                                          }
+                                        })
+                                        .catch(
+                                          (rejectedValueOrSerializedError) => {
+                                            console.log(
+                                              rejectedValueOrSerializedError
+                                            );
+                                            Swal.fire(
+                                              "Có lỗi xảy ra",
+                                              "",
+                                              "error"
+                                            );
+                                          }
+                                        );
+                                    } else if (result.isDenied) {
+                                      Swal.fire(
+                                        "Changes are not saved",
+                                        "",
+                                        "info"
+                                      );
+                                    }
+                                  });
+                                }}
+                                className="me-3"
+                              >
+                                <MDBIcon fas icon="money-bill" />
+                                {/* <img src={eye} alt="img" /> */}
+                              </Link>
+                            )}
+
+                            {item.status == "CHECKED_OUT" && (
+                              <Link
+                                title="Bill"
+                                style={{ marginLeft: "8px" }}
+                                onClick={() => {
+                                  setBooking(item);
+                                  setDisplayModal(true);
+                                  setStatusModal("success");
+                                  setMessageModal("Cập nhật thành công");
+                                }}
+                              >
+                                <MDBIcon fas icon="file-invoice" />
+                              </Link>
+                            )}
+                          </>
+                        )}
+                        {option != "bookings" && !deleteFlag && (
                           <>
                             <Link
                               className="me-3"
@@ -152,6 +450,26 @@ const Card = ({ option, data, keys, deleteOption, deleteFlag }) => {
                               className="me-3 confirm-text"
                               href="#"
                               onClick={() => deleteOption(item["id"])}
+                              style={{ marginLeft: "12px" }}
+                            >
+                              <img src={adminDelete} alt="img" />
+                            </a>
+                          </>
+                        )}
+                        {option != "bookings" && deleteFlag && (
+                          <>
+                            <a
+                              className="me-3 confirm-text"
+                              href="#"
+                              onClick={() => revertOption(item["id"])}
+                            >
+                              <MDBIcon fas icon="redo" />
+                            </a>
+                            <a
+                              className="me-3 confirm-text"
+                              href="#"
+                              onClick={() => deleteOption(item["id"])}
+                              style={{ marginLeft: "12px" }}
                             >
                               <img src={adminDelete} alt="img" />
                             </a>

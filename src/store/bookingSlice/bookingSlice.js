@@ -14,7 +14,7 @@ export const fetchGetBookings = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -27,7 +27,7 @@ export const fetchGetBookingsAdmin = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -40,7 +40,7 @@ export const fetchGetBookingsUser = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -60,7 +60,7 @@ export const fetchGetAvailableBookings = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -73,7 +73,7 @@ export const fetchGetBooking = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -83,6 +83,21 @@ export const fetchCreateBooking = createAsyncThunk(
   async (createBookingDto, thunkAPI) => {
     try {
       const response = await bookingService.createBooking(createBookingDto);
+      return response.data;
+    } catch (err) {
+      return err.response.data;
+    }
+  }
+);
+
+export const fetchCancelBooking = createAsyncThunk(
+  "booking",
+  async ({ bookingId, cancelBookingDto }, thunkAPI) => {
+    try {
+      const response = await bookingService.cancelBooking(
+        bookingId,
+        cancelBookingDto
+      );
       return response.data;
     } catch (err) {
       return err.response.data;
@@ -101,7 +116,20 @@ export const fetchUpdateBooking = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
+    }
+  }
+);
+
+export const fetchCheckoutBookingById = createAsyncThunk(
+  "booking",
+  async ({ bookingId }, thunkAPI) => {
+    try {
+      const response = await bookingService.checkoutBookingById(bookingId);
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      return err.response.data;
     }
   }
 );

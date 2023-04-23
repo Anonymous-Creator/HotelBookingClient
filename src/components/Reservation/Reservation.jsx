@@ -16,6 +16,7 @@ const Reservation = ({
   step,
 }) => {
   const [price, setPrice] = useState(0);
+  const [discountPrice, setDiscountPrice] = useState(0);
   const dispatch = useDispatch();
   useEffect(() => {
     // console.log(services);
@@ -23,8 +24,20 @@ const Reservation = ({
     //   setPrice((prev) => prev + room.price);
     // }
     setPrice(room.price);
+    if (room.sale?.salePercent) {
+      setDiscountPrice(
+        room.price - (room.price * room.sale?.salePercent) / 100
+      );
+    }
+
+    console.log("add service", services);
     if (services?.length > 0) {
-      setPrice((prev) => prev + services[services.length - 1].price);
+      let newPrice = price + services[services.length - 1].price;
+      let newDiscountPrice =
+        discountPrice + services[services.length - 1].price;
+      setPrice(newPrice);
+      setDiscountPrice(newDiscountPrice);
+
     }
   }, [room, services.length]);
 
@@ -84,7 +97,6 @@ const Reservation = ({
                 <div className="font-weight-bold">{service.title}</div>
                 <div>
                   <strong>
-                    {" "}
                     {service.price.toLocaleString("it-IT", {
                       style: "currency",
                       currency: "VND",
@@ -121,6 +133,45 @@ const Reservation = ({
               })}
           </div>
         </div>
+        {room && room.sale?.salePercent && (
+          <>
+            <div
+              style={{ display: "flex", justifyContent: "space-between" }}
+              className="mb-3"
+            >
+              <div>
+                <div
+                  style={{ fontWeight: "bold", fontSize: "20px" }}
+                  className="price"
+                >
+                  Sale
+                </div>
+              </div>
+              <div style={{ color: "rgb(238, 77, 45)" }} className="price">
+                -{room.sale?.salePercent}% phòng
+              </div>
+            </div>
+            <div
+              style={{ display: "flex", justifyContent: "space-between" }}
+              className="mb-3"
+            >
+              <div>
+                <div
+                  style={{ fontWeight: "bold", fontSize: "20px" }}
+                  className="price"
+                >
+                  New Total
+                </div>
+              </div>
+              <div className="price">
+                {discountPrice.toLocaleString("it-IT", {
+                  style: "currency",
+                  currency: "VND",
+                })}
+              </div>
+            </div>
+          </>
+        )}
       </div>
       <button
         type="button"
@@ -133,18 +184,13 @@ const Reservation = ({
               alert("Vui lòng chọn phòng");
             }
           } else if (step == 2) {
-            if (!(num == 0 || !room.capacity)) {
+            if (!num && !room.capacity) {
               alert("Vui lòng điền đầy đủ Check in, Check out");
             } else {
-              // console.log({
-              //   roomId: room.id,
-              //   expectedCheckIn,
-              //   expectedCheckOut,
-              //   services,
-              // });
               const servicesUpdate = services.map((service) => {
                 return { serviceId: service.id, amount: 1 };
               });
+
               const result = await dispatch(
                 fetchCreateBooking({
                   roomIds: [room.id],

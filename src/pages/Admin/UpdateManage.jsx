@@ -103,10 +103,11 @@ const UpdateManage = () => {
         .then(unwrapResult)
         .then((originalPromiseResult) => {
           const data = originalPromiseResult.data;
+          console.log(data);
           setData(data);
           if (data?.medias) {
-            let urls = data.medias.map((media) => media.url);
-            setVirtualOldImg([...urls]);
+            // let urls = data.medias.map((media) => media.url);
+            setVirtualOldImg([...data.medias]);
           }
           if (data?.thumbnail) {
             setVirtualOldImg(data?.thumbnail);
@@ -127,9 +128,9 @@ const UpdateManage = () => {
       if (!data.type) {
         data.type = "VIP";
       }
-      data["mediaIds[]"] = data["medias"].map((item) => item.id);
+      data["mediaIds[]"] = data["medias"] ? data["medias"] : [];
       delete data["medias"];
-      let files = data["files"];
+      let files = data["files"] ? data["files"] : [];
       delete ["files"];
       let formData = new FormData();
       for (let file of files) {
@@ -162,9 +163,11 @@ const UpdateManage = () => {
         productUpdateDto: formData,
       });
     } else if (option == "posts") {
-      data["mediaIds[]"] = data["medias"].map((item) => item.id);
+      console.log(data["medias"]);
+      data["mediaIds[]"] = data["medias"] ? data["medias"] : [];
+      console.log(data);
       delete data["medias"];
-      let files = data["files"];
+      let files = data["files"] ? data["files"] : [];
       delete ["files"];
       let formData = new FormData();
       for (let file of files) {
@@ -198,15 +201,18 @@ const UpdateManage = () => {
       });
   };
 
-  const handleDeleteImage = (index) => {
-    virtualImg.splice(index, 1);
-    virtualOldImg.splice(index, 1);
-    setVirtualImg([...virtualImg]);
-    setVirtualOldImg([...virtualOldImg]);
-    setData((prevState) => {
-      data["medias"] = virtualOldImg;
-      return prevState;
-    });
+  const handleDeleteImage = (option, index) => {
+    if (option == "old") {
+      virtualOldImg.splice(index, 1);
+      setVirtualOldImg([...virtualOldImg]);
+      setData((prevState) => {
+        data["medias"] = virtualOldImg.map((medias) => medias.id);
+        return prevState;
+      });
+    } else if (option == "new") {
+      virtualImg.splice(index, 1);
+      setVirtualImg([...virtualImg]);
+    }
   };
 
   return (
@@ -222,7 +228,7 @@ const UpdateManage = () => {
         // status="success"
       />
       <AdminHeader />
-      <AdminSIdeBar />
+      <AdminSIdeBar option={option} />
       <div className="page-wrapper">
         <div className="content">
           <div className="page-header">
@@ -230,9 +236,7 @@ const UpdateManage = () => {
               <h4>
                 {option.charAt(0).toUpperCase() + option.slice(1)} Management
               </h4>
-              <h6>
-                Add/Update {option.charAt(0).toUpperCase() + option.slice(1)}
-              </h6>
+              <h6>Update {option.charAt(0).toUpperCase() + option.slice(1)}</h6>
             </div>
           </div>
           <div className="card">
@@ -247,6 +251,7 @@ const UpdateManage = () => {
                           onChange={(e) => {
                             setData((prevState) => {
                               prevState[key] = e.target.value;
+                              console.log(prevState);
                               return prevState;
                             });
                             setValue(e.target.value);
@@ -308,10 +313,12 @@ const UpdateManage = () => {
                               {virtualOldImg &&
                                 virtualOldImg.map((img, index) => (
                                   <div className="image-uploads-img">
-                                    <img src={img} alt="img" />
+                                    <img src={img.url} alt="img" />
                                     <div
                                       className="image-uploads-icon"
-                                      onClick={(e) => handleDeleteImage(index)}
+                                      onClick={(e) =>
+                                        handleDeleteImage("old", index)
+                                      }
                                     >
                                       <i class="fa-solid fa-xmark"></i>
                                     </div>
@@ -323,7 +330,9 @@ const UpdateManage = () => {
                                     <img src={img} alt="img" />
                                     <div
                                       className="image-uploads-icon"
-                                      onClick={(e) => handleDeleteImage(index)}
+                                      onClick={(e) =>
+                                        handleDeleteImage("new", index)
+                                      }
                                     >
                                       <i class="fa-solid fa-xmark"></i>
                                     </div>
@@ -375,7 +384,7 @@ const UpdateManage = () => {
                             });
                             setValue(e.target.value);
                           }}
-                          value={data["dayStart"]}
+                          value={data["dayEnd"]}
                         />
                       </div>
                     </div>
@@ -448,10 +457,12 @@ const UpdateManage = () => {
                               {virtualOldImg &&
                                 virtualOldImg.map((img, index) => (
                                   <div className="image-uploads-img">
-                                    <img src={img} alt="img" />
+                                    <img src={img.url} alt="img" />
                                     <div
                                       className="image-uploads-icon"
-                                      onClick={(e) => handleDeleteImage(index)}
+                                      onClick={(e) =>
+                                        handleDeleteImage("old", index)
+                                      }
                                     >
                                       <i class="fa-solid fa-xmark"></i>
                                     </div>
@@ -463,7 +474,9 @@ const UpdateManage = () => {
                                     <img src={img} alt="img" />
                                     <div
                                       className="image-uploads-icon"
-                                      onClick={(e) => handleDeleteImage(index)}
+                                      onClick={(e) =>
+                                        handleDeleteImage("new", index)
+                                      }
                                     >
                                       <i class="fa-solid fa-xmark"></i>
                                     </div>

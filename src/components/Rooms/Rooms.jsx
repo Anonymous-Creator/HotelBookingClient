@@ -17,6 +17,7 @@ import { unwrapResult } from "@reduxjs/toolkit";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./room.scss";
+import Swal from "sweetalert2";
 
 const Rooms = ({
   expectedCheckIn,
@@ -27,11 +28,20 @@ const Rooms = ({
 }) => {
   const dispatch = useDispatch();
   const [rooms, setRooms] = useState([]);
+  const [pageNum, setPageNum] = useState(1);
+  const [pageTotal, setPageTotal] = useState(1);
 
   // console.log({ expectedCheckIn, expectedCheckOut, num, type });
   const transferDateTimeToTime = (dateTime) => {
     const time = dateTime.split("T")[0];
     return time;
+  };
+
+  let checkValidTime = (dayStart, dayEnd) => {
+    return (
+      new Date(dayStart).getTime() <= Date.now() &&
+      new Date(dayEnd).getTime() >= Date.now()
+    );
   };
 
   useEffect(() => {
@@ -42,11 +52,19 @@ const Rooms = ({
           expectedCheckOut: transferDateTimeToTime(expectedCheckOut),
           num,
           type,
+          pageNum,
         })
       )
         .then(unwrapResult)
         .then((originalPromiseResult) => {
-          setRooms(originalPromiseResult.data.items);
+          if (originalPromiseResult.status == "SUCCESS") {
+            if (originalPromiseResult.data.meta.totalPages != 0) {
+              setPageTotal(originalPromiseResult.data.meta.totalPages);
+            }
+            setRooms(originalPromiseResult.data.items);
+          } else {
+            Swal.fire("Lỗi server", "", "error");
+          }
         })
         .catch((rejectedValueOrSerializedError) => {
           console.log(rejectedValueOrSerializedError);
@@ -55,7 +73,7 @@ const Rooms = ({
     transferDateTimeToTime(expectedCheckIn);
     // console.log()
     // console.log(expectedCheckIn, expectedCheckOut, num, type);
-  }, [expectedCheckIn, expectedCheckOut, num, type]);
+  }, [expectedCheckIn, expectedCheckOut, num, type, pageNum]);
 
   return (
     <div>
@@ -68,21 +86,77 @@ const Rooms = ({
                   <div className="room-item" style={{ display: "flex" }}>
                     <div style={{ width: "40%" }}>
                       <img
-                        style={{ width: "100%" }}
+                        style={{
+                          width: "280px",
+                          height: "380px",
+                          objectFit: "cover",
+                        }}
                         src={room?.medias?.[0]?.url}
                         alt=""
                       />
                     </div>
-                    <div style={{ width: "60%" }} className="ri-text">
+                    <div
+                      style={{ width: "60%", position: "relative" }}
+                      className="ri-text"
+                    >
                       <h4>{room.name}</h4>
-                      <h3>
-                        {room &&
-                          room.price.toLocaleString("it-IT", {
-                            style: "currency",
-                            currency: "VND",
-                          })}{" "}
-                        <span>/Pernight</span>
-                      </h3>
+                      <div style={{ display: "flex" }}>
+                        <h3
+                          style={{
+                            color: checkValidTime(
+                              room.sale?.dayStart,
+                              room.sale?.dayEnd
+                            )
+                              ? "rgba(0,0,0,.54)"
+                              : "#5892b5",
+                            textDecoration: checkValidTime(
+                              room.sale?.dayStart,
+                              room.sale?.dayEnd
+                            )
+                              ? "line-through"
+                              : "none",
+                          }}
+                        >
+                          {room &&
+                            room?.price?.toLocaleString("it-IT", {
+                              style: "currency",
+                              currency: "VND",
+                            })}
+                        </h3>
+                        {checkValidTime(
+                          room.sale?.dayStart,
+                          room.sale?.dayEnd
+                        ) && (
+                          <h3 style={{ marginLeft: "12px" }}>
+                            {room &&
+                              (
+                                room.price -
+                                (room.price * room.sale.salePercent) / 100
+                              ).toLocaleString("it-IT", {
+                                style: "currency",
+                                currency: "VND",
+                              })}
+                          </h3>
+                        )}
+                      </div>
+                      {room.sale?.salePercent != null &&
+                        checkValidTime(
+                          room.sale?.dayStart,
+                          room.sale?.dayEnd
+                        ) && (
+                          <h4
+                            style={{
+                              position: "absolute",
+                              top: "12px",
+                              right: "12px",
+                              fontSize: "16px",
+                              color: "#ee4d2d",
+                              fontWeight: 400,
+                            }}
+                          >
+                            Giảm giá {room.sale.salePercent} %
+                          </h4>
+                        )}
                       <table>
                         <tbody>
                           <tr>
@@ -109,20 +183,30 @@ const Rooms = ({
                       >
                         More Details
                       </Link>
+                      {!room.isAvailable && (
+                        <div
+                          style={{ marginLeft: "8px", color: "red" }}
+                          className="primary-btn"
+                        >
+                          Booked
+                        </div>
+                      )}
                       <div style={{ marginTop: "30px" }}></div>
-                      <button
-                        className="btn btn-link p-0 btn-add-room"
-                        onClick={(e) => {
-                          roomCallBack(room);
-                        }}
-                        style={{
-                          color: "#848492",
-                          height: "40px",
-                          width: "200px",
-                        }}
-                      >
-                        Add to my booking
-                      </button>
+                      {room.isAvailable && (
+                        <button
+                          className="btn btn-link p-0 btn-add-room"
+                          onClick={(e) => {
+                            roomCallBack(room);
+                          }}
+                          style={{
+                            color: "#848492",
+                            height: "40px",
+                            width: "200px",
+                          }}
+                        >
+                          Add to my booking
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -130,11 +214,29 @@ const Rooms = ({
             })}
           <div className="col-lg-12">
             <div className="room-pagination">
-              <a href="#">1</a>
-              <a href="#">2</a>
-              <a href="#">
-                Next <i className="fa fa-long-arrow-right" />
-              </a>
+              {pageNum != 1 && (
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPageNum(pageNum - 1);
+                  }}
+                >
+                  <i className="fa fa-long-arrow-left" /> Prev
+                </a>
+              )}
+              <Link to="/booking">{pageNum}</Link>
+              {pageTotal && pageNum != pageTotal && (
+                <a
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPageNum(pageNum + 1);
+                  }}
+                  href="#"
+                >
+                  Next <i className="fa fa-long-arrow-right" />
+                </a>
+              )}
             </div>
           </div>
         </div>

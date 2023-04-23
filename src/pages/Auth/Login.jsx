@@ -230,7 +230,86 @@ const Login = () => {
                   </div>
                 </fieldset>
                 <div className="forms_buttons">
-                  <button type="button" className="forms_buttons-forgot">
+                  <button
+                    type="button"
+                    className="forms_buttons-forgot"
+                    onClick={() => {
+                      Swal.fire({
+                        title: "Enter your email to resert password",
+                        input: "text",
+                        inputAttributes: {
+                          autocapitalize: "off",
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: "Enter",
+                        showLoaderOnConfirm: true,
+                        preConfirm: async (email) => {
+                          return fetch(
+                            `${process.env.REACT_APP_API_URL}/api/v1/auth/forgot-password?email=${email}`,
+                            {
+                              method: "POST",
+                            }
+                          )
+                            .then((response) => {
+                              console.log(response);
+                              if (!response.ok) {
+                                throw new Error(response.statusText);
+                              }
+                              return email;
+                            })
+                            .catch((error) => {
+                              Swal.showValidationMessage(
+                                `Request failed: ${error}`
+                              );
+                            });
+                        },
+                      }).then(async (result) => {
+                        const email = result.value;
+                        if (!email) {
+                          return;
+                        }
+                        Swal.fire({
+                          title: "Your token is sent to " + email,
+                          html: `<input type="text" id="token" class="swal2-input" placeholder="Your token">
+                          <input type="password" id="password" class="swal2-input" placeholder="New password">`,
+                          confirmButtonText: "Confirm",
+                          focusConfirm: false,
+                          preConfirm: async () => {
+                            const token =
+                              Swal.getPopup().querySelector("#token").value;
+                            const password =
+                              Swal.getPopup().querySelector("#password").value;
+                            if (!token || !password) {
+                              Swal.showValidationMessage(
+                                `Please enter token and new password`
+                              );
+                            }
+                            const response = await fetch(
+                              `${process.env.REACT_APP_API_URL}/api/v1/auth/forgot-password/verify?email=${email}&token=${token}&password=${password}`,
+                              {
+                                method: "POST",
+                              }
+                            );
+                            if (response.status != 200) {
+                              if (!token || !password) {
+                                Swal.showValidationMessage(
+                                  `Please enter correct token`
+                                );
+                              }
+                            }
+                            return await response.json();
+                            // return { token: token, password: password };
+                          },
+                        }).then((info) => {
+                          Swal.fire(
+                            "Cập nhật mật khẩu thành công",
+                            "",
+                            "success"
+                          );
+                        });
+                      });
+                    }}
+                  >
                     Forgot password?
                   </button>
                   <input

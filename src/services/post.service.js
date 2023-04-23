@@ -5,14 +5,12 @@ class PostService {
     this.httpService = new HttpService();
   }
 
-  async getPostsAdmin(deleteFlag) {
+  async getPostsAdmin(options) {
     return await this.httpService.request(
       "GET",
       `${process.env.REACT_APP_API_URL}/api/v1/post/admin`,
       {
-        params: {
-          deleteFlag: deleteFlag,
-        },
+        params: options,
       }
     );
   }
@@ -53,6 +51,20 @@ class PostService {
     return await this.httpService.request(
       "DELETE",
       `${process.env.REACT_APP_API_URL}/api/v1/post/delete/${postId}`
+    );
+  }
+
+  async revertPostById(postId) {
+    return await this.httpService.request(
+      "POST",
+      `${process.env.REACT_APP_API_URL}/api/v1/post/restore/${postId}`
+    );
+  }
+
+  async deletePermanPostById(postId) {
+    return await this.httpService.request(
+      "DELETE",
+      `${process.env.REACT_APP_API_URL}/api/v1/post/delete/trash/${postId}`
     );
   }
 }

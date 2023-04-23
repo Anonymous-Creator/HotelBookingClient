@@ -65,6 +65,7 @@ function FilterBooking({ filter }) {
       <div className="row">
         <div className="col-lg-3 col-md-6">
           <div className="room-item">
+            <h2>Check in</h2>
             <DatePicker
               dateFormat="dd/MM/yyyy"
               selected={startDate}
@@ -77,6 +78,7 @@ function FilterBooking({ filter }) {
         </div>
         <div className="col-lg-3 col-md-6">
           <div className="room-item">
+            <h2>Check out</h2>
             <DatePicker
               dateFormat="dd/MM/yyyy"
               selected={endDate}
@@ -93,6 +95,7 @@ function FilterBooking({ filter }) {
         </div>
         <div className="col-lg-3 col-md-6">
           <div className="room-item">
+            <h2>Person Number</h2>
             <select
               id="guest"
               className="custom-select select-option"
@@ -115,6 +118,7 @@ function FilterBooking({ filter }) {
         </div>
         <div className="col-lg-3 col-md-6">
           <div className="room-item">
+            <h2>Type Room</h2>
             <select
               style={{ width: "208px", height: "49px", fontSize: "18px" }}
               id="guest"

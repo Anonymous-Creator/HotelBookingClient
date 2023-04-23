@@ -13,6 +13,8 @@ import Booking from "../pages/Booking/Booking";
 import UpdateManage from "../pages/Admin/UpdateManage";
 import BookingDetail from "../pages/Booking/BookingDetail";
 import BookingCart from "../pages/Booking/BookingCart";
+import Test from "../pages/Test";
+import Statistic from "../pages/Admin/Statistic";
 const publicRoutes = [
   { path: "/", component: Home },
   { path: "/blog-detail/:blogId", component: BlogDetail },
@@ -23,6 +25,7 @@ const publicRoutes = [
   { path: "/blogs", component: Blog },
   // { path: "/auth/login", component: Login },
   { path: "/auth/register", component: Register },
+  { path: "/test", component: Test },
 ];
 
 const privateRoutes = [
@@ -30,6 +33,7 @@ const privateRoutes = [
   { path: "/booking-detail/:bookingId", component: BookingDetail },
   { path: "/booking-cart", component: BookingCart },
   { path: "/booking", component: Booking },
+  { path: "/admin", component: Statistic },
   { path: "/admin/:option", component: Manage },
   { path: "/admin/add/:option", component: AddManage },
   { path: "/admin/update/:option/:optionId", component: UpdateManage },

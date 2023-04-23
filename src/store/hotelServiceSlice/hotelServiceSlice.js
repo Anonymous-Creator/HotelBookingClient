@@ -8,13 +8,13 @@ const hotelService = new HotelServiceService();
 
 export const fetchGetHotelServicesAdmin = createAsyncThunk(
   "/hotels",
-  async (deleteFlag, thunkAPI) => {
+  async (options, thunkAPI) => {
     try {
-      const response = await hotelService.getServicesAdmin(deleteFlag);
+      const response = await hotelService.getServicesAdmin(options);
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -27,7 +27,7 @@ export const fetchGetHotelServices = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -40,7 +40,7 @@ export const fetchGetHotelService = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -56,7 +56,7 @@ export const fetchUpdateHotelService = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -69,16 +69,45 @@ export const fetchCreateHotelServices = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
 
 export const fetchDeleteHotelService = createAsyncThunk(
   "sale",
-  async (saleId, thunkAPI) => {
-    const response = await hotelService.deleteServiceById(saleId);
+  async (serviceId, thunkAPI) => {
+    const response = await hotelService.deleteServiceById(serviceId);
     return response.data;
+  }
+);
+
+export const fetchRevertHotelService = createAsyncThunk(
+  "sale",
+  async (serviceId, thunkAPI) => {
+    const response = await hotelService.revertServiceById(serviceId);
+    return response.data;
+  }
+);
+
+export const fetchDeletePermanentlyHotelService = createAsyncThunk(
+  "sale",
+  async (saleId, thunkAPI) => {
+    const response = await hotelService.deletePermanentlyServiceById(saleId);
+    return response.data;
+  }
+);
+
+export const fetchGetProductsByService = createAsyncThunk(
+  "/hotels",
+  async (serviceId, thunkAPI) => {
+    try {
+      const response = await hotelService.getProductsByServices(serviceId);
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      return err.response.data;
+    }
   }
 );
 

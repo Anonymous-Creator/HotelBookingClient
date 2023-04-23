@@ -6,7 +6,6 @@ const Modal = ({ displayModal, statusModal, messageModal, callback, url }) => {
   const [display, setDisplay] = useState(displayModal);
   const [status, setStatus] = useState(statusModal);
   const [message, setMessage] = useState(messageModal);
-  console.log(displayModal, statusModal, messageModal);
 
   useEffect(() => {
     setDisplay(displayModal);

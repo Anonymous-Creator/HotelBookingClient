@@ -44,7 +44,14 @@ const Blog = () => {
               blogs.map((blog) => (
                 <div className="col-lg-4 col-md-6">
                   <div className="blog-item set-bg">
-                    <img src={blog.medias?.[0]?.url} />
+                    <img
+                      style={{
+                        width: "350px",
+                        height: "425px",
+                        objectFit: "cover",
+                      }}
+                      src={blog.medias?.[0]?.url}
+                    />
                     <div className="bi-text">
                       <span className="b-tag">{"Hotel Blog"}</span>
                       <h4>

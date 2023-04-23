@@ -8,31 +8,26 @@ const roomService = new RoomService();
 // First, create the thunk
 export const fetchGetRooms = createAsyncThunk(
   "/rooms",
-  async (deleteFlag, thunkAPI) => {
+  async (options, thunkAPI) => {
     try {
-      const response = await roomService.getRooms(deleteFlag);
+      const response = await roomService.getRooms(options);
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
 
 export const fetchGetAvailableRooms = createAsyncThunk(
   "/rooms",
-  async ({ expectedCheckIn, expectedCheckOut, num, type }, thunkAPI) => {
+  async (options, thunkAPI) => {
     try {
-      const response = await roomService.getAvailableRooms(
-        expectedCheckIn,
-        expectedCheckOut,
-        num,
-        type
-      );
+      const response = await roomService.getAvailableRooms(options);
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -45,7 +40,7 @@ export const fetchGetRoom = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -58,7 +53,7 @@ export const fetchRatingByRoomId = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -71,7 +66,7 @@ export const fetchCreateRoom = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -84,7 +79,7 @@ export const fetchUpdateRoom = createAsyncThunk(
       return response.data;
     } catch (err) {
       console.log(err);
-      return err.response;
+      return err.response.data;
     }
   }
 );
@@ -93,6 +88,22 @@ export const fetchDeleteRoom = createAsyncThunk(
   "room",
   async (roomId, thunkAPI) => {
     const response = await roomService.deleteRoomById(roomId);
+    return response.data;
+  }
+);
+
+export const fetchDeletePermanentlyRoom = createAsyncThunk(
+  "room",
+  async (roomId, thunkAPI) => {
+    const response = await roomService.deleteRoomPermanentlyById(roomId);
+    return response.data;
+  }
+);
+
+export const fetchRevertRoomById = createAsyncThunk(
+  "room",
+  async (roomId, thunkAPI) => {
+    const response = await roomService.revertRoomById(roomId);
     return response.data;
   }
 );

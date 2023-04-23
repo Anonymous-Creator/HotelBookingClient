@@ -12,6 +12,7 @@ import {
   fetchRatingByRoomId,
 } from "../../store/roomSlice/roomSlice";
 import "./roomDetail.scss";
+import OwlCarousel from "react-owl-carousel";
 
 const RoomDetail = () => {
   let { roomId } = useParams();
@@ -29,6 +30,7 @@ const RoomDetail = () => {
         .then(unwrapResult)
         .then((originalPromiseResult) => {
           setRoom(originalPromiseResult.data);
+          console.log(originalPromiseResult.data);
           // console.log(originalPromiseResult.data);
         })
         .catch((rejectedValueOrSerializedError) => {
@@ -118,14 +120,41 @@ const RoomDetail = () => {
           <div className="row">
             <div className="col-lg-8">
               <div className="room-details-item">
-                <img
+                <OwlCarousel
+                  style={{
+                    // position: "absolute",
+                    top: "0",
+                    width: "100%",
+                  }}
+                  className="owl-main hero-slider"
+                  items={1}
+                  loop
+                >
+                  {room?.medias?.map((media) => {
+                    return (
+                      <div className="item hs-item set-bg">
+                        <img
+                          style={{ width: "100%", height: "450px" }}
+                          src={media.url}
+                          alt=""
+                        />
+                        {/* <img
+                          style={{ height: "250px", width: "100%" }}
+                          src={media.url}
+                          alt=""
+                        /> */}
+                      </div>
+                    );
+                  })}
+                </OwlCarousel>
+                {/* <img
                   style={{ width: "100%", height: "450px" }}
                   src={room && room.medias?.[0]?.url}
                   alt=""
-                />
+                /> */}
                 <div className="rd-text">
                   <div className="rd-title">
-                    <h3>{room.title}</h3>
+                    <h3 style={{ fontSize: "24px" }}>{room.name}</h3>
                     <div className="rdt-right">
                       <div className="rating">
                         <i className="icon_star" />
@@ -138,7 +167,12 @@ const RoomDetail = () => {
                     </div>
                   </div>
                   <h2>
-                    {room.price}$<span>/Pernight</span>
+                    {room &&
+                      room?.price?.toLocaleString("it-IT", {
+                        style: "currency",
+                        currency: "VND",
+                      })}
+                    <span>/Pernight</span>
                   </h2>
                   <table>
                     <tbody>

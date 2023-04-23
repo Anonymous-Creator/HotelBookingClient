@@ -38,9 +38,9 @@ const Footer = () => {
               <div className="ft-contact">
                 <h6>Contact Us</h6>
                 <ul>
-                  <li>(12) 345 67890</li>
-                  <li>info.colorlib@gmail.com</li>
-                  <li>856 Cordia Extension Apt. 356, Lake, United State</li>
+                  <li>0325529034</li>
+                  <li>thanhhuonghotelluxury@gmail.com</li>
+                  <li>Ha Dinh, Thanh Xuan, Ha Noi</li>
                 </ul>
               </div>
             </div>

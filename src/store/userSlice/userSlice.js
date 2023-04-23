@@ -9,9 +9,9 @@ const initialState = {
 
 export const fetchGetUsers = createAsyncThunk(
   "/user",
-  async (deleteFlag, thunkAPI) => {
+  async (options, thunkAPI) => {
     try {
-      const response = await userService.getUsers(deleteFlag);
+      const response = await userService.getUsers(options);
       return response.data;
     } catch (err) {
       return err.response.data;
@@ -52,6 +52,15 @@ export const fetchGetCurrentUser = createAsyncThunk(
     } catch (err) {
       return err.response.data;
     }
+  }
+);
+
+export const fetchLockUnlockUser = createAsyncThunk(
+  "user",
+  async ({ userId, isLocked }, thunkAPI) => {
+    console.log(userId, isLocked);
+    const response = await userService.lockUnlockUserById(userId, isLocked);
+    return response.data;
   }
 );
 

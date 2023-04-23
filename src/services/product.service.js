@@ -5,14 +5,12 @@ class ProductService {
     this.httpService = new HttpService();
   }
 
-  async getProductsAdmin(deleteFlag) {
+  async getProductsAdmin(options) {
     return await this.httpService.request(
       "GET",
       `${process.env.REACT_APP_API_URL}/api/v1/product/admin`,
       {
-        params: {
-          deleteFlag: deleteFlag,
-        },
+        params: options,
       }
     );
   }
@@ -53,6 +51,20 @@ class ProductService {
     return await this.httpService.request(
       "DELETE",
       `${process.env.REACT_APP_API_URL}/api/v1/product/delete/${productId}`
+    );
+  }
+
+  async revertProductById(productId) {
+    return await this.httpService.request(
+      "POST",
+      `${process.env.REACT_APP_API_URL}/api/v1/product/restore/${productId}`
+    );
+  }
+
+  async deletePermanentlyProductById(productId) {
+    return await this.httpService.request(
+      "DELETE",
+      `${process.env.REACT_APP_API_URL}/api/v1/product/delete/trash/${productId}`
     );
   }
 }

@@ -5557,7 +5557,7 @@ span.select2-container.select2-container--default.select2-container--open {
   opacity: 0;
   height: 100px;
   position: relative;
-  z-index: 9;
+  /* z-index: 9; */
   cursor: pointer;
 }
 .image-upload .image-uploads {

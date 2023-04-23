@@ -205,7 +205,7 @@ const User = () => {
                               className="form-control-label"
                               htmlFor="input-country"
                             >
-                              Country
+                              Birthday
                             </label>
                             <input
                               type="date"

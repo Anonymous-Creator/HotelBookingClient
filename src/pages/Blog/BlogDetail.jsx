@@ -115,7 +115,7 @@ const BlogDetail = () => {
                     </a>
                   </div>
                 </div>
-                <div className="comment-option">
+                {/* <div className="comment-option">
                   <h4>2 Comments</h4>
                   <div className="single-comment-item first-comment">
                     <div className="sc-author">
@@ -203,7 +203,7 @@ const BlogDetail = () => {
                       </div>
                     </div>
                   </form>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

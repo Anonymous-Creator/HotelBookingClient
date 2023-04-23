@@ -5,13 +5,15 @@ class RoomService {
     this.httpService = new HttpService();
   }
 
-  async getAvailableRooms(expectedCheckIn, expectedCheckOut, num, type) {
-    console.log(expectedCheckIn, expectedCheckOut, num, type);
+  async getAvailableRooms(options) {
+    // console.log(expectedCheckIn, expectedCheckOut, num, type);
     let params = {};
-    if (expectedCheckIn) params["checkin"] = expectedCheckIn;
-    if (expectedCheckOut) params["checkout"] = expectedCheckOut;
-    if (num) params["capacity"] = num;
-    if (type) params["roomType"] = type;
+    if (options.expectedCheckIn) params["checkin"] = options.expectedCheckIn;
+    if (options.expectedCheckOut) params["checkout"] = options.expectedCheckOut;
+    if (options.num) params["capacity"] = options.num;
+    if (options.type) params["roomType"] = options.type;
+    if (options.pageNum) params["pageNum"] = options.pageNum;
+    params["pageSize"] = 9;
     return await this.httpService.request(
       "GET",
       `${process.env.REACT_APP_API_URL}/api/v1/room/available`,
@@ -22,14 +24,12 @@ class RoomService {
     );
   }
 
-  async getRooms(deleteFlag) {
+  async getRooms(options) {
     return await this.httpService.request(
       "GET",
       `${process.env.REACT_APP_API_URL}/api/v1/room`,
       {
-        params: {
-          deleteFlag: deleteFlag,
-        },
+        params: options,
       }
     );
   }
@@ -71,6 +71,20 @@ class RoomService {
     return await this.httpService.request(
       "DELETE",
       `${process.env.REACT_APP_API_URL}/api/v1/room/delete/${roomId}`
+    );
+  }
+
+  async deleteRoomPermanentlyById(roomId) {
+    return await this.httpService.request(
+      "DELETE",
+      `${process.env.REACT_APP_API_URL}/api/v1/room/delete/trash/${roomId}`
+    );
+  }
+
+  async revertRoomById(roomId) {
+    return await this.httpService.request(
+      "POST",
+      `${process.env.REACT_APP_API_URL}/api/v1/room/restore/${roomId}`
     );
   }
 

@@ -7,9 +7,9 @@ const productService = new ProductService();
 
 export const fetchGetProductsAdmin = createAsyncThunk(
   "/products",
-  async (deleteFlag, thunkAPI) => {
+  async (options, thunkAPI) => {
     try {
-      const response = await productService.getProductsAdmin(deleteFlag);
+      const response = await productService.getProductsAdmin(options);
       return response.data;
     } catch (err) {
       return err.response.data;
@@ -72,6 +72,24 @@ export const fetchDeleteProduct = createAsyncThunk(
   "sale",
   async (productId, thunkAPI) => {
     const response = await productService.deleteProductById(productId);
+    return response.data;
+  }
+);
+
+export const fetchRevertProduct = createAsyncThunk(
+  "sale",
+  async (productId, thunkAPI) => {
+    const response = await productService.revertProductById(productId);
+    return response.data;
+  }
+);
+
+export const fetchDeletePermanentlyProduct = createAsyncThunk(
+  "sale",
+  async (productId, thunkAPI) => {
+    const response = await productService.deletePermanentlyProductById(
+      productId
+    );
     return response.data;
   }
 );

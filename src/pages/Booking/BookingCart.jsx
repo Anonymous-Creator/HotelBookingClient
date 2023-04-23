@@ -9,7 +9,6 @@ const BookingCart = () => {
   const dispatch = useDispatch();
   const [bookings, setBookings] = useState([]);
   const user = useSelector((state) => state.user.value);
-  console.log(user);
 
   useEffect(() => {
     (async () => {
@@ -73,15 +72,19 @@ const BookingCart = () => {
                     return (
                       <tr>
                         <td>
-                          {booking.rooms[0].name}{" "}
-                          {booking.rooms[0].price.toLocaleString("it-IT", {
+                          {booking.rooms?.[0]?.name}{" "}
+                          {booking.rooms?.[0]?.price.toLocaleString("it-IT", {
                             style: "currency",
                             currency: "VND",
                           })}
                           $/Pernight
                         </td>
-                        <td>{booking.rooms[0].capacity}</td>
-                        <td>User</td>
+                        <td>{booking.rooms?.[0]?.capacity}</td>
+                        <td>
+                          {booking.createdBy.firstName.concat(
+                            " " + booking.createdBy.lastName
+                          )}
+                        </td>
                         <td>{booking.checkIn}</td>
                         <td>{booking.checkOut}</td>
                         <td>
@@ -99,9 +102,11 @@ const BookingCart = () => {
                                   : "#87d068",
                             }}
                           >
-                            {booking.status == "Chưa thanh toán"
-                              ? "#f50"
-                              : "Chưa thanh toán"}
+                            {booking.status == "PENDING"
+                              ? "Chưa thanh toán"
+                              : booking.status == "CANCEL"
+                              ? "Đã hủy"
+                              : "Đã thanh toán"}
                           </span>
                         </td>
                         <td>

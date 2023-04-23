@@ -27,7 +27,8 @@ const Header = () => {
                   <i className="fa fa-phone" /> 0-842343
                 </li>
                 <li>
-                  <i className="fa fa-envelope" /> huongbug@gmail.com
+                  <i className="fa fa-envelope" /> thanhhuonghotelluxury
+                  @gmail.com
                 </li>
               </ul>
             </div>
@@ -115,7 +116,7 @@ const Header = () => {
                       <Link to={"/about-us"}>ABOUT US</Link>
                     </li>
                     <li>
-                      <Link to={"/blogs"}>NEWS</Link>
+                      <Link to={"/blogs"}>BLOGS</Link>
                     </li>
                     {/* <li>
                       <a href="./contact.html">Contact</a>

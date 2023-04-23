@@ -11,9 +11,9 @@ const postService = new PostService();
 
 export const fetchGetPostsAdmin = createAsyncThunk(
   "/posts",
-  async (deleteFlag, thunkAPI) => {
+  async (options, thunkAPI) => {
     try {
-      const response = await postService.getPostsAdmin(deleteFlag);
+      const response = await postService.getPostsAdmin(options);
       return response.data;
     } catch (err) {
       return isRejectedWithValue(err.response.data);
@@ -79,6 +79,22 @@ export const fetchDeletePost = createAsyncThunk(
   "room",
   async (postId, thunkAPI) => {
     const response = await postService.deletePostById(postId);
+    return response.data;
+  }
+);
+
+export const fetchRevertPost = createAsyncThunk(
+  "room",
+  async (postId, thunkAPI) => {
+    const response = await postService.revertPostById(postId);
+    return response.data;
+  }
+);
+
+export const fetchDeletePermanentlyPost = createAsyncThunk(
+  "room",
+  async (postId, thunkAPI) => {
+    const response = await postService.deletePermanPostById(postId);
     return response.data;
   }
 );

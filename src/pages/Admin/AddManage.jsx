@@ -13,8 +13,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   fetchCreateHotelServices,
   fetchGetHotelService,
+  fetchGetHotelServicesAdmin,
 } from "../../store/hotelServiceSlice/hotelServiceSlice";
-import { fetchCreateProduct } from "../../store/productSlice/productSlice";
+import {
+  fetchCreateProduct,
+  fetchGetProductsAdmin,
+} from "../../store/productSlice/productSlice";
 import productInterface from "../../interfaces/product.interface";
 import postInterface from "../../interfaces/post.interface";
 import { fetchCreateSale, fetchGetSale } from "../../store/saleSlice/saleSlice";
@@ -23,6 +27,13 @@ import { fetchCreatePost } from "../../store/postSlice/postSlice";
 import Modal from "../../components/Modal/Modal";
 import salesInterface from "../../interfaces/sales.interface";
 import "./addManage.scss";
+import Select from "react-select";
+
+const options = [
+  { value: "chocolate", label: "Chocolate" },
+  { value: "strawberry", label: "Strawberry" },
+  { value: "vanilla", label: "Vanilla" },
+];
 
 const AddUser = () => {
   const dispatch = useDispatch();
@@ -34,6 +45,7 @@ const AddUser = () => {
   const [statusModal, setStatusModal] = useState("");
   const [messageModal, setMessageModal] = useState("");
   const [virtualImg, setVirtualImg] = useState(["assets/img/icons/upload.svg"]);
+  const [serivceData, setServiceData] = useState([]);
 
   const callback = () => {
     setDisplayModal(false);
@@ -62,6 +74,7 @@ const AddUser = () => {
       setData({ ...servicesInterface });
       delete servicesInterface["id"];
     } else if (option == "products") {
+      delete productInterface["serviceId"];
       setKeys([...Object.keys(productInterface)]);
       setData({ ...productInterface });
       delete productInterface["id"];
@@ -73,6 +86,7 @@ const AddUser = () => {
   }, [option]);
 
   const addOption = async () => {
+    // return;
     let func;
     if (option == "rooms") {
       if (!data.type) {
@@ -141,6 +155,30 @@ const AddUser = () => {
         // handle result here
       });
   };
+  useEffect(() => {
+    (async () => {
+      if (option == "products") {
+        const result = await dispatch(
+          fetchGetHotelServicesAdmin({ deleteFlag: false })
+        )
+          .then(unwrapResult)
+          .then((originalPromiseResult) => {
+            if (originalPromiseResult.status == "SUCCESS") {
+              let services = originalPromiseResult.data.items.map((item) => {
+                return {
+                  value: item.id,
+                  label: item.title,
+                };
+              });
+              setServiceData(services);
+            }
+          })
+          .catch((rejectedValueOrSerializedError) => {
+            console.log(rejectedValueOrSerializedError);
+          });
+      }
+    })();
+  }, [option]);
 
   const handleDeleteImage = (index) => {
     virtualImg.splice(index, 1);
@@ -161,7 +199,7 @@ const AddUser = () => {
         // status="success"
       />
       <AdminHeader />
-      <AdminSIdeBar />
+      <AdminSIdeBar option={option} />
       <div className="page-wrapper">
         <div className="content">
           <div className="page-header">
@@ -169,9 +207,7 @@ const AddUser = () => {
               <h4>
                 {option.charAt(0).toUpperCase() + option.slice(1)} Management
               </h4>
-              <h6>
-                Add/Update {option.charAt(0).toUpperCase() + option.slice(1)}
-              </h6>
+              <h6>Add {option.charAt(0).toUpperCase() + option.slice(1)}</h6>
             </div>
           </div>
           <div className="card">
@@ -367,6 +403,31 @@ const AddUser = () => {
                       </div>
                     </div>
                   </>
+                )}
+
+                {option == "products" && (
+                  <div className="col-lg-3 col-sm-6 col-12">
+                    <div className="form-group">
+                      <label>{"Services"}</label>
+                      <Select
+                        styles={{
+                          control: (baseStyles, state) => ({
+                            ...baseStyles,
+                            borderColor: state.isFocused ? "grey" : "red",
+                            height: "40px",
+                          }),
+                        }}
+                        options={serivceData}
+                        onChange={(selectedOption) => {
+                          console.log(`Option selected:`, selectedOption);
+                          setData((prevState) => {
+                            prevState["serviceId"] = selectedOption.value;
+                            return prevState;
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
                 )}
 
                 {(option == "products" || option == "services") && (

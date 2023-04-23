@@ -17,19 +17,37 @@ import {
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Rooms = () => {
   const dispatch = useDispatch();
   const [rooms, setRooms] = useState([]);
+  const [pageNum, setPageNum] = useState(1);
+  const [pageTotal, setPageTotal] = useState(1);
+
+  let checkValidTime = (dayStart, dayEnd) => {
+    return (
+      new Date(dayStart).getTime() <= Date.now() &&
+      new Date(dayEnd).getTime() >= Date.now()
+    );
+  };
 
   useEffect(() => {
     (async () => {
-      const result = await dispatch(fetchGetAvailableRooms({}))
+      const result = await dispatch(
+        fetchGetAvailableRooms({
+          pageNum: pageNum,
+        })
+      )
         .then(unwrapResult)
         .then((originalPromiseResult) => {
-          setRooms(originalPromiseResult.data.items);
-          console.log(originalPromiseResult.data.items);
-          console.log(rooms);
+          if (originalPromiseResult.status == "SUCCESS") {
+            setRooms(originalPromiseResult.data.items);
+            setPageTotal(originalPromiseResult.data.meta.totalPages);
+            console.log(originalPromiseResult);
+          } else {
+            Swal.fire("Lỗi Server", "", "error");
+          }
           // handle result here
         })
         .catch((rejectedValueOrSerializedError) => {
@@ -39,7 +57,7 @@ const Rooms = () => {
     })();
 
     // return () => {}; // no-op
-  }, []);
+  }, [pageNum]);
 
   return (
     <div>
@@ -81,11 +99,65 @@ const Rooms = () => {
                         })}
                       </OwlCarousel>
 
-                      <div className="ri-text">
+                      <div className="ri-text" style={{ position: "relative" }}>
                         <h4>{room.name}</h4>
-                        <h3>
-                          {room.price} VNĐ<span>/Pernight</span>
-                        </h3>
+                        <div style={{ display: "flex" }}>
+                          <h3
+                            style={{
+                              color: checkValidTime(
+                                room.sale?.dayStart,
+                                room.sale?.dayEnd
+                              )
+                                ? "rgba(0,0,0,.54)"
+                                : "#5892b5",
+                              textDecoration: checkValidTime(
+                                room.sale?.dayStart,
+                                room.sale?.dayEnd
+                              )
+                                ? "line-through"
+                                : "none",
+                            }}
+                          >
+                            {room &&
+                              room?.price?.toLocaleString("it-IT", {
+                                style: "currency",
+                                currency: "VND",
+                              })}
+                          </h3>
+                          {checkValidTime(
+                            room.sale?.dayStart,
+                            room.sale?.dayEnd
+                          ) && (
+                            <h3 style={{ marginLeft: "12px" }}>
+                              {room &&
+                                (
+                                  room.price -
+                                  (room.price * room.sale.salePercent) / 100
+                                ).toLocaleString("it-IT", {
+                                  style: "currency",
+                                  currency: "VND",
+                                })}
+                            </h3>
+                          )}
+                        </div>
+                        {room.sale?.salePercent != null &&
+                          checkValidTime(
+                            room.sale?.dayStart,
+                            room.sale?.dayEnd
+                          ) && (
+                            <h4
+                              style={{
+                                position: "absolute",
+                                top: "12px",
+                                right: "12px",
+                                fontSize: "16px",
+                                color: "#ee4d2d",
+                                fontWeight: 400,
+                              }}
+                            >
+                              Giảm giá {room.sale.salePercent} %
+                            </h4>
+                          )}
                         <table>
                           <tbody>
                             <tr>
@@ -127,11 +199,29 @@ const Rooms = () => {
               })}
             <div className="col-lg-12">
               <div className="room-pagination">
-                <a href="#">1</a>
-                <a href="#">2</a>
-                <a href="#">
-                  Next <i className="fa fa-long-arrow-right" />
-                </a>
+                {pageNum != 1 && (
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPageNum(pageNum - 1);
+                    }}
+                  >
+                    <i className="fa fa-long-arrow-left" /> Prev
+                  </a>
+                )}
+                <Link to="/rooms">{pageNum}</Link>
+                {pageTotal && pageNum != pageTotal && (
+                  <a
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPageNum(pageNum + 1);
+                    }}
+                    href="#"
+                  >
+                    Next <i className="fa fa-long-arrow-right" />
+                  </a>
+                )}
               </div>
             </div>
           </div>

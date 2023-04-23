@@ -13,28 +13,37 @@ import AdminSideBar from "../../components/AdminSideBar";
 import adminPlus from "../../assets/img/admin/adminPlus.png";
 import { useDispatch } from "react-redux";
 import {
+  fetchDeletePermanentlyRoom,
   fetchDeleteRoom,
   fetchGetRooms,
+  fetchRevertRoomById,
 } from "../../store/roomSlice/roomSlice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useEffect, useState } from "react";
 import {
   fetchDeleteHotelService,
+  fetchDeletePermanentlyHotelService,
   fetchGetHotelServices,
   fetchGetHotelServicesAdmin,
+  fetchRevertHotelService,
 } from "../../store/hotelServiceSlice/hotelServiceSlice";
 import {
+  fetchDeletePermanentlySale,
   fetchDeleteSale,
   fetchGetSales,
+  fetchRevertSale,
 } from "../../store/saleSlice/saleSlice";
 import {
   fetchDeleteUser,
   fetchGetUsers,
+  fetchLockUnlockUser,
 } from "../../store/userSlice/userSlice";
 import {
+  fetchDeletePermanentlyProduct,
   fetchDeleteProduct,
   fetchGetProducts,
   fetchGetProductsAdmin,
+  fetchRevertProduct,
 } from "../../store/productSlice/productSlice";
 import saleInterface from "../../interfaces/sales.interface";
 import roomsInterface from "../../interfaces/rooms.interface";
@@ -45,16 +54,21 @@ import bookingInterface from "../../interfaces/booking.interface.js";
 import Swal from "sweetalert2";
 import postInterface from "../../interfaces/post.interface.js";
 import {
+  fetchDeletePermanentlyPost,
   fetchDeletePost,
   fetchGetPosts,
   fetchGetPostsAdmin,
+  fetchRevertPost,
 } from "../../store/postSlice/postSlice";
 import { fetchGetBookingsAdmin } from "../../store/bookingSlice/bookingSlice";
 import Card from "../../components/Card/Card";
+import BillModal from "../../components/Modal/BillModal";
 
 const UserManage = () => {
   const [iconsActive, setIconsActive] = useState("tab1");
   const [deleteFlag, setDeleteFlag] = useState(false);
+  const [pageNum, setPageNum] = useState(1);
+  const [pageTotal, setPageTotal] = useState(1);
 
   const handleIconsClick = (value) => {
     if (value === iconsActive) {
@@ -75,60 +89,149 @@ const UserManage = () => {
   let { option, optionId } = useParams();
 
   useEffect(() => {
+    setPageNum(1);
     (async () => {
       let func;
       if (option == "rooms") {
-        func = fetchGetRooms(deleteFlag);
+        func = fetchGetRooms({ deleteFlag, pageNum });
         setKeys([...Object.keys(roomsInterface)]);
       } else if (option == "sales") {
-        func = fetchGetSales(deleteFlag);
+        func = fetchGetSales({ deleteFlag, pageNum });
         setKeys([...Object.keys(saleInterface)]);
       } else if (option == "users") {
-        func = fetchGetUsers(deleteFlag);
+        func = fetchGetUsers({ isLocked: deleteFlag, pageNum });
         setKeys([...Object.keys(usersInterface)]);
       } else if (option == "services") {
-        func = fetchGetHotelServicesAdmin(deleteFlag);
+        func = fetchGetHotelServicesAdmin({ deleteFlag, pageNum });
         setKeys([...Object.keys(servicesInterface)]);
       } else if (option == "products") {
-        func = fetchGetProductsAdmin(deleteFlag);
+        func = fetchGetProductsAdmin({ deleteFlag, pageNum });
         setKeys([...Object.keys(productInterface)]);
       } else if (option == "posts") {
-        func = fetchGetPostsAdmin(deleteFlag);
+        func = fetchGetPostsAdmin({ deleteFlag, pageNum });
         setKeys([...Object.keys(postInterface)]);
       } else if (option == "bookings") {
-        func = fetchGetBookingsAdmin(deleteFlag);
+        func = fetchGetBookingsAdmin({ deleteFlag, pageNum });
         setKeys([...Object.keys(bookingInterface)]);
       }
       const result = await dispatch(func)
         .then(unwrapResult)
         .then((originalPromiseResult) => {
           console.log(originalPromiseResult);
-          const data = originalPromiseResult.data.items;
-          setData(data);
+          if (originalPromiseResult.status == "SUCCESS") {
+            let data = originalPromiseResult.data.items;
+            if (originalPromiseResult.data.meta.totalPages != 0) {
+              setPageTotal(originalPromiseResult.data.meta.totalPages);
+            }
+
+            if (option == "rooms") {
+              data = data.map((item) => {
+                if (item.sale.salePercent) {
+                  item["discount"] = item.sale.salePercent + "%";
+                }
+                return item;
+              });
+            }
+            setData(data);
+          } else {
+            Swal.fire("Lỗi server", "", "error");
+          }
         })
         .catch((rejectedValueOrSerializedError) => {
           console.log(rejectedValueOrSerializedError);
         });
     })();
-  }, [option, deleteFlag]);
+  }, [option, deleteFlag, pageNum]);
 
   const deleteOption = async (id) => {
+    console.log(id);
     let func;
     if (option == "rooms") {
-      func = fetchDeleteRoom(id);
+      if (deleteFlag == false) {
+        func = fetchDeleteRoom(id);
+      } else {
+        func = fetchDeletePermanentlyRoom(id);
+      }
     } else if (option == "users") {
-      func = fetchDeleteUser(id);
+      if (deleteFlag == false) {
+        func = fetchLockUnlockUser({ userId: id, isLocked: true });
+      } else {
+        func = fetchDeleteUser(id);
+      }
     } else if (option == "sales") {
-      func = fetchDeleteSale(id);
+      if (deleteFlag == false) {
+        func = fetchDeleteSale(id);
+      } else {
+        func = fetchDeletePermanentlySale(id);
+      }
     } else if (option == "services") {
-      func = fetchDeleteHotelService(id);
+      if (deleteFlag == false) {
+        func = fetchDeleteHotelService(id);
+      } else {
+        func = fetchDeletePermanentlyHotelService(id);
+      }
     } else if (option == "products") {
-      func = fetchDeleteProduct(id);
+      if (deleteFlag == false) {
+        func = fetchDeleteProduct(id);
+      } else {
+        func = fetchDeletePermanentlyProduct(id);
+      }
     } else if (option == "posts") {
-      func = fetchDeletePost(id);
+      if (deleteFlag == false) {
+        func = fetchDeletePost(id);
+      } else {
+        func = fetchDeletePermanentlyPost(id);
+      }
     }
     Swal.fire({
       title: "Bạn có chắc chắn xóa ?",
+      text: "",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Chấp nhận",
+      cancelButtonText: "Hủy bỏ",
+    }).then(async (e) => {
+      if (e.isConfirmed) {
+        const result = await dispatch(func)
+          .then(unwrapResult)
+          .then((originalPromiseResult) => {
+            if (originalPromiseResult.status == "SUCCESS") {
+              // setData(originalPromiseResult.data.items);
+              const newData = data.filter((item) => item.id != id);
+              setData(newData);
+              // console.log(originalPromiseResult.data.items);
+              Swal.fire("Xóa thành công", "", "success");
+            } else {
+              Swal.fire("Lỗi Server", "", "error");
+            }
+          })
+          .catch((rejectedValueOrSerializedError) => {
+            console.log(rejectedValueOrSerializedError);
+            Swal.fire("Lỗi Server", "", "error");
+          });
+      }
+    });
+  };
+
+  const revertOption = async (id) => {
+    let func;
+    if (option == "rooms") {
+      func = fetchRevertRoomById(id);
+    } else if (option == "users") {
+      func = fetchLockUnlockUser({ userId: id, isLocked: false });
+    } else if (option == "sales") {
+      func = fetchRevertSale(id);
+    } else if (option == "services") {
+      func = fetchRevertHotelService(id);
+    } else if (option == "products") {
+      func = fetchRevertProduct(id);
+    } else if (option == "posts") {
+      func = fetchRevertPost(id);
+    }
+    Swal.fire({
+      title: "Bạn có chắc chắn phục hồi ?",
       text: "",
       icon: "warning",
       showCancelButton: true,
@@ -141,7 +244,7 @@ const UserManage = () => {
           .then(unwrapResult)
           .then((originalPromiseResult) => {
             console.log("delete", originalPromiseResult);
-            Swal.fire("Xóa thành công", "", "success");
+            Swal.fire("Phục hồi thành công", "", "success");
             setTimeout(() => {
               window.location.href = "/admin/" + option;
             }, 2000);
@@ -158,7 +261,7 @@ const UserManage = () => {
     <>
       <div className="main-wrapper">
         <AdminHeader />
-        <AdminSideBar />
+        <AdminSideBar option={option} />
         <div className="page-wrapper">
           <div className="content">
             <div className="page-header">
@@ -170,10 +273,10 @@ const UserManage = () => {
               </div>
               {option != "users" && option != "bookings" && (
                 <div className="page-btn">
-                  <a href={"/admin/add/" + option} className="btn btn-added">
+                  <Link className="btn btn-added" to={"/admin/add/" + option}>
                     <img src={adminPlus} alt="img" />
                     Add {option}
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>
@@ -214,6 +317,7 @@ const UserManage = () => {
                     data={data}
                     keys={keys}
                     deleteOption={deleteOption}
+                    revertOption={revertOption}
                     deleteFlag={deleteFlag}
                   />{" "}
                 </MDBTabsPane>
@@ -222,6 +326,33 @@ const UserManage = () => {
                 </MDBTabsPane>
               </MDBTabsContent>
             </>
+            <div className="col-lg-12">
+              <div className="room-pagination">
+                {pageNum != 1 && (
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPageNum(pageNum - 1);
+                    }}
+                  >
+                    <i className="fa fa-long-arrow-left" /> Prev
+                  </a>
+                )}
+                <Link to={"/admin/" + option}>{pageNum}</Link>
+                {pageTotal && pageNum != pageTotal && (
+                  <a
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPageNum(pageNum + 1);
+                    }}
+                    href="#"
+                  >
+                    Next <i className="fa fa-long-arrow-right" />
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
