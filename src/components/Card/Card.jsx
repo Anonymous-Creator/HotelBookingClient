@@ -19,6 +19,8 @@ import { unwrapResult } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
 import { fetchCheckoutBookingById } from "../../store/bookingSlice/bookingSlice";
 import BillModal from "../Modal/BillModal";
+import "./card.scss";
+
 const Card = ({
   option,
   data,
@@ -89,7 +91,9 @@ const Card = ({
                       style={{ color: "rebeccapurple" }}
                       className="me-3 confirm-text"
                       href="#"
-                      onClick={async () => {
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        console.log(roomsSale);
                         let sales;
                         const func = fetchGetSales({
                           deleteFlag: false,
@@ -125,7 +129,7 @@ const Card = ({
                               const result = await dispatch(
                                 fetchAddSaleToRoom({
                                   saleId: value,
-                                  // roomId: item["id"],
+                                  roomIds: roomsSale,
                                 })
                               )
                                 .then(unwrapResult)
@@ -140,11 +144,6 @@ const Card = ({
                                       "success"
                                     );
                                   } else {
-                                    // Swal.fire(
-                                    //   originalPromiseResult.message,
-                                    //   "",
-                                    //   "error"
-                                    // );
                                   }
                                 })
                                 .catch((rejectedValueOrSerializedError) => {
@@ -249,7 +248,7 @@ const Card = ({
                           <input
                             type="checkbox"
                             onChange={(e) => {
-                              console.log(item);
+                              console.log(e.target.checked);
                               roomsSale.push(item.id);
                               setRoomsSale(roomsSale);
                             }}
@@ -312,7 +311,7 @@ const Card = ({
                                     const result = await dispatch(
                                       fetchAddSaleToRoom({
                                         saleId: value,
-                                        roomId: [item["id"]],
+                                        roomIds: [item["id"]],
                                       })
                                     )
                                       .then(unwrapResult)
