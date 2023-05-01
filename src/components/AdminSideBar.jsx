@@ -70,10 +70,14 @@ const AdminSIdeBar = ({ option }) => {
                       <li key={index} style={{ padding: "12px" }}>
                         <Link
                           className={
-                            sideBar.name.split(" ")[1] ==
+                            (sideBar.name.split(" ")[1] ==
                             option.charAt(0).toUpperCase() + option.slice(1)
                               ? "active"
-                              : ""
+                              : "") ||
+                            (sideBar.name == "Statistic" &&
+                            sideBar.path == "/admin"
+                              ? "active"
+                              : "")
                           }
                           to={sideBar.path}
                         >

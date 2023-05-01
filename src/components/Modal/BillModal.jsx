@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./billModal.scss";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 const BillModal = ({
   displayModal,
@@ -13,6 +15,21 @@ const BillModal = ({
   const [display, setDisplay] = useState(displayModal);
   const [status, setStatus] = useState(statusModal);
   const [message, setMessage] = useState(messageModal);
+  const printRef = React.useRef();
+
+  const handleDownloadPdf = async () => {
+    const element = printRef.current;
+    const canvas = await html2canvas(element);
+    const data = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF();
+    const imgProperties = pdf.getImageProperties(data);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+
+    pdf.addImage(data, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save("print.pdf");
+  };
 
   useEffect(() => {
     setDisplay(displayModal);
@@ -43,7 +60,7 @@ const BillModal = ({
               <div className="row justify-content-center">
                 <div className="">
                   <div className="card">
-                    <div className="card-body p-5">
+                    <div className="card-body p-5" ref={printRef}>
                       <h2>
                         Hey{" "}
                         {booking &&
@@ -51,11 +68,7 @@ const BillModal = ({
                           booking.createdBy.firstName}
                         ,
                       </h2>
-                      <p className="fs-sm">
-                        This is the receipt for a payment of{" "}
-                        <strong>$312.00</strong> (USD) you made to Spacial
-                        Themes.
-                      </p>
+                      <p className="fs-sm">This is the receipt for a payment</p>
                       <div className="border-top border-gray-200 pt-4 mt-4">
                         <div className="row">
                           <div className="col-md-6">
@@ -97,7 +110,7 @@ const BillModal = ({
                           </div>
                           <div className="col-md-6 text-md-end">
                             <div className="text-muted mb-2">Payment To</div>
-                            <strong>Themes LLC</strong>
+                            <strong>Hotel Booking</strong>
                             <p className="fs-sm">
                               Thanh Xuan, Ha Noi
                               <br />
@@ -206,6 +219,7 @@ const BillModal = ({
                     <a
                       href="#!"
                       className="btn btn-dark btn-lg card-footer-btn justify-content-center text-uppercase-bold-sm hover-lift-light"
+                      onClick={handleDownloadPdf}
                     >
                       <span className="svg-icon text-white me-2">
                         <svg
@@ -242,7 +256,7 @@ const BillModal = ({
                           />
                         </svg>
                       </span>
-                      Pay Now
+                      Download Now
                     </a>
                   </div>
                 </div>
@@ -253,7 +267,8 @@ const BillModal = ({
                 // to={"/admin/bookings"}
                 className="btn btn-success"
                 data-dismiss="modal"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   callback();
                 }}
               >

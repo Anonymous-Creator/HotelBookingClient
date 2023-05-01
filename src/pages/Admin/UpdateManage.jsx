@@ -104,14 +104,15 @@ const UpdateManage = () => {
         .then((originalPromiseResult) => {
           const data = originalPromiseResult.data;
           console.log(data);
-          setData(data);
           if (data?.medias) {
-            // let urls = data.medias.map((media) => media.url);
             setVirtualOldImg([...data.medias]);
+            data["medias"] = data.medias.map((media) => media.id);
           }
           if (data?.thumbnail) {
             setVirtualOldImg(data?.thumbnail);
+            // data["medias"] = data.medias.map((media) => media.id);
           }
+          setData(data);
         })
         .catch((rejectedValueOrSerializedError) => {
           console.log(rejectedValueOrSerializedError);
@@ -126,7 +127,7 @@ const UpdateManage = () => {
 
     if (option == "rooms") {
       if (!data.type) {
-        data.type = "VIP";
+        data.type = "Standard Single";
       }
       data["mediaIds[]"] = data["medias"] ? data["medias"] : [];
       delete data["medias"];
@@ -274,14 +275,50 @@ const UpdateManage = () => {
                             padding: "9px",
                           }}
                           onChange={(e) => {
+                            console.log(e.target.value);
                             setData((prevState) => {
                               prevState["type"] = e.target.value;
                               return prevState;
                             });
                           }}
                         >
-                          <option value="VIP">VIP</option>
-                          <option value="Normal">Normal</option>
+                          <option value="Standard Single">
+                            Standard Single
+                          </option>
+                          <option value="Standard Double">
+                            Standard Double
+                          </option>
+                          <option value="Standard Twin">Standard Twin</option>
+                          <option value="Superior Double">
+                            Superior Double
+                          </option>
+                          <option value="Superior Twin">Superior Twin</option>
+                          <option value="Superior King">Superior King</option>
+                          <option value="Deluxe Double">Deluxe Double</option>
+                          <option value="Deluxe Double Sea View">
+                            Deluxe Double Sea View
+                          </option>
+                          <option value="Deluxe Twin">Deluxe Twin</option>
+                          <option
+                            value="
+                            Deluxe Twin Sea View"
+                          >
+                            Deluxe Twin Sea View
+                          </option>
+                          <option value="Deluxe King">Deluxe King</option>
+                          <option value="Deluxe King Sea View">
+                            Deluxe King Sea View
+                          </option>
+                          <option value="Deluxe Triple">Deluxe Triple</option>
+                          <option value="Deluxe Triple Sea View">
+                            Deluxe Triple Sea View
+                          </option>
+                          <option value="Junior Suite">Junior Suite</option>
+                          <option value="Family Suite">Family Suite</option>
+                          <option value="Senior Suite">Senior Suite</option>
+                          <option value="Executive Suite">
+                            Executive Suite
+                          </option>
                         </select>
                       </div>
                     </div>
@@ -406,6 +443,7 @@ const UpdateManage = () => {
                             onChange={(e) => {
                               setData((prevState) => {
                                 prevState["thumbnailFile"] = e.target.files[0];
+                                prevState["thumbnail"] = null;
                                 setVirtualOldImg(
                                   URL.createObjectURL(e.target.files[0])
                                 );

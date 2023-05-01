@@ -14,8 +14,11 @@ const Statistic = () => {
   const [lineData, setLineData] = useState(null);
   const [pieData, setPieData] = useState(null);
   const [barData, setBarData] = useState(null);
+  const [monthBar, setMonthBar] = useState("1");
 
   useMemo(() => {
+    console.log(monthBar);
+
     (async () => {
       try {
         const promiseAll = await Promise.allSettled([
@@ -45,9 +48,7 @@ const Statistic = () => {
             await fetch(
               `${
                 process.env.REACT_APP_API_URL
-              }/api/v1/statistic/room-booked-month?month=${
-                new Date().getMonth() + 1
-              }&year=${new Date().getFullYear()}`,
+              }/api/v1/statistic/room-booked-month?month=${monthBar}&year=${new Date().getFullYear()}`,
               {
                 headers: {
                   Authorization: "Bearer " + storageService.get("token"),
@@ -133,19 +134,22 @@ const Statistic = () => {
               "rgba(53, 162, 235, 0.5)",
               "rgba(53, 162, 235, 0.5)",
             ];
+            // console.log(promiseAll[2].value);
             const data = rooms.map((item, index) => {
               return {
                 label: item.room.name,
-                data: item.value,
+                data: [item.value],
                 backgroundColor: backgroundColor[index],
               };
             });
+
             const chartData = {
-              labels: ["January"],
+              labels: [monthBar],
               datasets: data,
             };
+            console.log(chartData);
+            console.log(verticalData);
             setBarData(chartData);
-            console.log("chartData", chartData);
           }
         }
         // console.log(promiseAll);
@@ -153,9 +157,7 @@ const Statistic = () => {
         console.log(err);
       }
     })();
-  }, []);
-
-  console.log(pieData);
+  }, [monthBar]);
 
   return (
     <>
@@ -199,8 +201,35 @@ const Statistic = () => {
                       },
                     }}
                     data={barData}
+                    // data={verticalData}
                   />
                 )}
+                <select
+                  id="guest"
+                  className="custom-select select-option"
+                  name="num"
+                  style={{
+                    width: "200px",
+                    height: "40px",
+                    padding: "9px",
+                  }}
+                  onChange={(e) => {
+                    setMonthBar(e.target.value);
+                  }}
+                >
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
               </div>
             </div>
           </div>

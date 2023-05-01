@@ -37,7 +37,6 @@ const Reservation = ({
         discountPrice + services[services.length - 1].price;
       setPrice(newPrice);
       setDiscountPrice(newDiscountPrice);
-
     }
   }, [room, services.length]);
 
@@ -204,6 +203,9 @@ const Reservation = ({
                   console.log(originalPromiseResult);
                   if (originalPromiseResult.status == "SUCCESS") {
                     Swal.fire("Đặt phòng thành công", "", "success");
+                    setTimeout(() => {
+                      window.location.href = "/booking-cart";
+                    }, 1500);
                     reservation(step + 1);
                   } else {
                     Swal.fire("Có lỗi xảy ra", "", "error");

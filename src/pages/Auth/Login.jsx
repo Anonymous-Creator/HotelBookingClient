@@ -15,6 +15,7 @@ import { redirect } from "react-router-dom";
 import storageService from "../../services/storage.service";
 import Modal from "../../components/Modal/Modal";
 import Swal from "sweetalert2";
+import { MDBIcon } from "mdb-react-ui-kit";
 
 const Login = () => {
   const { register, handleSubmit } = useForm();
@@ -30,6 +31,7 @@ const Login = () => {
   const [newBirthday, setNewBirthday] = useState("");
   const [newAddress, setNewAddress] = useState("");
   const dispatch = useDispatch();
+  const [isClose, setIsClose] = useState(true);
 
   const signUpButton = () => {
     setIsBounceActive(true);
@@ -218,15 +220,42 @@ const Login = () => {
                       onChange={(e) => setEmailOrPhone(e.target.value)}
                     />
                   </div>
-                  <div className="forms_field">
+                  <div className="forms_field" style={{ position: "relative" }}>
                     <input
-                      type="password"
+                      type={isClose ? "password" : "text"}
                       placeholder="Password"
                       className="forms_field-input"
                       required=""
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "0",
+                        right: "12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {isClose && (
+                        <MDBIcon
+                          far
+                          icon="eye-slash"
+                          onClick={() => {
+                            setIsClose(!isClose);
+                          }}
+                        />
+                      )}
+                      {!isClose && (
+                        <MDBIcon
+                          far
+                          icon="eye"
+                          onClick={() => {
+                            setIsClose(!isClose);
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                 </fieldset>
                 <div className="forms_buttons">

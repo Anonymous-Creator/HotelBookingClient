@@ -35,7 +35,6 @@ export const lineOptions = {
 };
 
 const labels = ["January", "February", "March", "April", "May", "June", "July"];
-
 export const lineData = {
   labels,
   datasets: [

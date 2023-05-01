@@ -68,6 +68,19 @@ export const fetchAddSaleToRoom = createAsyncThunk(
   }
 );
 
+export const fetchRemoveSaleToRoom = createAsyncThunk(
+  "room",
+  async ({ roomIds }, thunkAPI) => {
+    try {
+      const response = await saleService.removeSaleToRoom(roomIds);
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      return err.response.data;
+    }
+  }
+);
+
 export const fetchUpdateSale = createAsyncThunk(
   "sale",
   async ({ saleId, updateSaleDto }, thunkAPI) => {

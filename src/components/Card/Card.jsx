@@ -14,6 +14,7 @@ import { MDBIcon } from "mdb-react-ui-kit";
 import {
   fetchAddSaleToRoom,
   fetchGetSales,
+  fetchRemoveSaleToRoom,
 } from "../../store/saleSlice/saleSlice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
@@ -35,8 +36,11 @@ const Card = ({
   const [messageModal, setMessageModal] = useState("");
   const [booking, setBooking] = useState({});
   const [roomsSale, setRoomsSale] = useState([]);
+  const [test, setTest] = useState("");
+  const [active, setActive] = useState([]);
 
   const callback = () => {
+    console.log("call back here");
     setDisplayModal(false);
     setStatusModal("");
     setMessageModal("");
@@ -49,6 +53,7 @@ const Card = ({
         statusModal={statusModal}
         messageModal={messageModal}
         booking={booking}
+        callback={callback}
         // displayStatus="true"
         // message="Cập nhật thành công"
         // status="success"
@@ -86,81 +91,134 @@ const Card = ({
             <div className="wordset">
               <ul>
                 {option == "rooms" && (
-                  <li>
-                    <a
-                      style={{ color: "rebeccapurple" }}
-                      className="me-3 confirm-text"
-                      href="#"
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        console.log(roomsSale);
-                        let sales;
-                        const func = fetchGetSales({
-                          deleteFlag: false,
-                        });
-                        const result = await dispatch(func)
-                          .then(unwrapResult)
-                          .then((originalPromiseResult) => {
-                            console.log(originalPromiseResult);
-                            if (originalPromiseResult.status == "SUCCESS") {
-                              sales = originalPromiseResult.data.items;
-                            }
-                          })
-                          .catch((rejectedValueOrSerializedError) => {
-                            console.log(rejectedValueOrSerializedError);
+                  <>
+                    <li>
+                      <a
+                        style={{ color: "rebeccapurple" }}
+                        className="me-3 confirm-text"
+                        href="#"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          console.log(roomsSale);
+                          let sales;
+                          const func = fetchGetSales({
+                            deleteFlag: false,
                           });
-                        let salesObject = {};
-                        sales.forEach((sale) => {
-                          salesObject[sale.id] = `${sale.salePercent}% - ${
-                            sale.dayStart.split("T")[0]
-                          } đến ${sale.dayEnd.split("T")[0]}`;
-                        });
+                          const result = await dispatch(func)
+                            .then(unwrapResult)
+                            .then((originalPromiseResult) => {
+                              console.log(originalPromiseResult);
+                              if (originalPromiseResult.status == "SUCCESS") {
+                                sales = originalPromiseResult.data.items;
+                              }
+                            })
+                            .catch((rejectedValueOrSerializedError) => {
+                              console.log(rejectedValueOrSerializedError);
+                            });
+                          let salesObject = {};
+                          sales.forEach((sale) => {
+                            salesObject[sale.id] = `${sale.salePercent}% - ${
+                              sale.dayStart.split("T")[0]
+                            } đến ${sale.dayEnd.split("T")[0]}`;
+                          });
 
-                        const { value: fruit } = await Swal.fire({
-                          title: "Select sales",
-                          input: "select",
-                          inputOptions: {
-                            Sales: salesObject,
-                          },
-                          inputPlaceholder: "Select sale",
-                          showCancelButton: true,
-                          inputValidator: async (value) => {
-                            if (value) {
+                          const { value: fruit } = await Swal.fire({
+                            title: "Select sales",
+                            input: "select",
+                            inputOptions: {
+                              Sales: salesObject,
+                            },
+                            inputPlaceholder: "Select sale",
+                            showCancelButton: true,
+                            inputValidator: async (value) => {
+                              if (value) {
+                                const result = await dispatch(
+                                  fetchAddSaleToRoom({
+                                    saleId: value,
+                                    roomIds: roomsSale,
+                                  })
+                                )
+                                  .then(unwrapResult)
+                                  .then((originalPromiseResult) => {
+                                    console.log(originalPromiseResult);
+                                    if (
+                                      originalPromiseResult.status == "SUCCESS"
+                                    ) {
+                                      Swal.fire(
+                                        "Thêm sale thành công",
+                                        "",
+                                        "success"
+                                      );
+                                      setTimeout(() => {
+                                        window.location.reload();
+                                      }, 1500);
+                                    } else {
+                                    }
+                                  })
+                                  .catch((rejectedValueOrSerializedError) => {
+                                    console.log(rejectedValueOrSerializedError);
+                                  });
+                              }
+                            },
+                          });
+
+                          // if (fruit) {
+                          //   Swal.fire(`You selected: ${fruit}`);
+                          // }
+                        }}
+                      >
+                        <MDBIcon fas icon="plus-circle" />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        style={{ color: "rebeccapurple" }}
+                        className="me-3 confirm-text"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          Swal.fire({
+                            title:
+                              "Bạn có chắc chắn xóa dịch vụ của tất cả các phòng đã chọn?",
+                            text: "",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#3085d6",
+                            cancelButtonColor: "#d33",
+                            confirmButtonText: "Chấp nhận",
+                            cancelButtonText: "Hủy bỏ",
+                          }).then(async (e) => {
+                            if (e.isConfirmed) {
                               const result = await dispatch(
-                                fetchAddSaleToRoom({
-                                  saleId: value,
+                                fetchRemoveSaleToRoom({
                                   roomIds: roomsSale,
                                 })
                               )
                                 .then(unwrapResult)
                                 .then((originalPromiseResult) => {
-                                  console.log(originalPromiseResult);
                                   if (
                                     originalPromiseResult.status == "SUCCESS"
                                   ) {
-                                    Swal.fire(
-                                      "Thêm sale thành công",
-                                      "",
-                                      "success"
-                                    );
+                                    Swal.fire("Xóa thành công", "", "success");
+                                    setTimeout(() => {
+                                      window.location.reload();
+                                    }, 1500);
                                   } else {
+                                    Swal.fire("Lỗi Server", "", "error");
                                   }
                                 })
                                 .catch((rejectedValueOrSerializedError) => {
                                   console.log(rejectedValueOrSerializedError);
+                                  Swal.fire("Lỗi Server", "", "error");
                                 });
                             }
-                          },
-                        });
-
-                        // if (fruit) {
-                        //   Swal.fire(`You selected: ${fruit}`);
-                        // }
-                      }}
-                    >
-                      <MDBIcon fas icon="plus-circle" />
-                    </a>
-                  </li>
+                          });
+                        }}
+                      >
+                        <MDBIcon fas icon="minus-circle" />
+                      </a>
+                    </li>
+                  </>
                 )}
                 <li>
                   <a
@@ -236,21 +294,32 @@ const Card = ({
                     </th>
                   )}
                   {keys && keys.map((key) => <th>{key}</th>)}
-                  <th>Settings</th>
+                  <th style={{ width: "120px" }}>Settings</th>
                 </tr>
               </thead>
               <tbody>
                 {data &&
                   data.map((item, index) => (
-                    <tr>
+                    <tr
+                      className={
+                        active.includes(index) && option == "rooms"
+                          ? "active"
+                          : ""
+                      }
+                    >
                       {option == "rooms" && (
                         <td>
                           <input
                             type="checkbox"
                             onChange={(e) => {
-                              console.log(e.target.checked);
+                              if (e.target.checked == true) {
+                                active.push(index);
+                              } else {
+                                active.pop(index);
+                              }
                               roomsSale.push(item.id);
                               setRoomsSale(roomsSale);
+                              setTest(item.name + e.target.checked);
                             }}
                           />
                         </td>
@@ -268,70 +337,130 @@ const Card = ({
                           style={{ marginRight: "8px" }}
                         ></Link>
                         {option == "rooms" && (
-                          <a
-                            className="me-3 confirm-text"
-                            href="#"
-                            onClick={async () => {
-                              let sales;
-                              const func = fetchGetSales({
-                                deleteFlag: false,
-                              });
-                              const result = await dispatch(func)
-                                .then(unwrapResult)
-                                .then((originalPromiseResult) => {
-                                  console.log(originalPromiseResult);
-                                  if (
-                                    originalPromiseResult.status == "SUCCESS"
-                                  ) {
-                                    sales = originalPromiseResult.data.items;
-                                  }
-                                })
-                                .catch((rejectedValueOrSerializedError) => {
-                                  console.log(rejectedValueOrSerializedError);
+                          <>
+                            <a
+                              className="me-3 confirm-text"
+                              href="#"
+                              onClick={async () => {
+                                let sales;
+                                const func = fetchGetSales({
+                                  deleteFlag: false,
                                 });
-                              let salesObject = {};
-                              sales.forEach((sale) => {
-                                salesObject[sale.id] = `${
-                                  sale.salePercent
-                                }% - ${sale.dayStart.split("T")[0]} đến ${
-                                  sale.dayEnd.split("T")[0]
-                                }`;
-                              });
+                                const result = await dispatch(func)
+                                  .then(unwrapResult)
+                                  .then((originalPromiseResult) => {
+                                    console.log(originalPromiseResult);
+                                    if (
+                                      originalPromiseResult.status == "SUCCESS"
+                                    ) {
+                                      sales = originalPromiseResult.data.items;
+                                    }
+                                  })
+                                  .catch((rejectedValueOrSerializedError) => {
+                                    console.log(rejectedValueOrSerializedError);
+                                  });
+                                let salesObject = {};
+                                sales.forEach((sale) => {
+                                  salesObject[sale.id] = `${
+                                    sale.salePercent
+                                  }% - ${sale.dayStart.split("T")[0]} đến ${
+                                    sale.dayEnd.split("T")[0]
+                                  }`;
+                                });
 
-                              const { value: fruit } = await Swal.fire({
-                                title: "Select sales",
-                                input: "select",
-                                inputOptions: {
-                                  Sales: salesObject,
-                                },
-                                inputPlaceholder: "Select sale",
-                                showCancelButton: true,
-                                inputValidator: async (value) => {
-                                  if (value) {
+                                const { value: fruit } = await Swal.fire({
+                                  title: "Select sales",
+                                  input: "select",
+                                  inputOptions: {
+                                    Sales: salesObject,
+                                  },
+                                  inputPlaceholder: "Select sale",
+                                  showCancelButton: true,
+                                  inputValidator: async (value) => {
+                                    if (value) {
+                                      const result = await dispatch(
+                                        fetchAddSaleToRoom({
+                                          saleId: value,
+                                          roomIds: [item["id"]],
+                                        })
+                                      )
+                                        .then(unwrapResult)
+                                        .then((originalPromiseResult) => {
+                                          console.log(originalPromiseResult);
+                                          if (
+                                            originalPromiseResult.status ==
+                                            "SUCCESS"
+                                          ) {
+                                            Swal.fire(
+                                              "Thêm sale thành công",
+                                              "",
+                                              "success"
+                                            );
+                                          } else {
+                                            // Swal.fire(
+                                            //   originalPromiseResult.message,
+                                            //   "",
+                                            //   "error"
+                                            // );
+                                          }
+                                        })
+                                        .catch(
+                                          (rejectedValueOrSerializedError) => {
+                                            console.log(
+                                              rejectedValueOrSerializedError
+                                            );
+                                          }
+                                        );
+                                    }
+                                  },
+                                });
+
+                                // if (fruit) {
+                                //   Swal.fire(`You selected: ${fruit}`);
+                                // }
+                              }}
+                              style={{ marginRight: "12px" }}
+                            >
+                              <MDBIcon fas icon="plus-circle" />
+                            </a>
+                            <a
+                              className="me-3 confirm-text"
+                              href="#"
+                              style={{ marginRight: "12px" }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                Swal.fire({
+                                  title: "Bạn có chắc chắn xóa dịch vụ?",
+                                  text: "",
+                                  icon: "warning",
+                                  showCancelButton: true,
+                                  confirmButtonColor: "#3085d6",
+                                  cancelButtonColor: "#d33",
+                                  confirmButtonText: "Chấp nhận",
+                                  cancelButtonText: "Hủy bỏ",
+                                }).then(async (e) => {
+                                  if (e.isConfirmed) {
                                     const result = await dispatch(
-                                      fetchAddSaleToRoom({
-                                        saleId: value,
+                                      fetchRemoveSaleToRoom({
                                         roomIds: [item["id"]],
                                       })
                                     )
                                       .then(unwrapResult)
                                       .then((originalPromiseResult) => {
-                                        console.log(originalPromiseResult);
                                         if (
                                           originalPromiseResult.status ==
                                           "SUCCESS"
                                         ) {
                                           Swal.fire(
-                                            "Thêm sale thành công",
+                                            "Xóa thành công",
                                             "",
                                             "success"
                                           );
+                                          setTimeout(() => {
+                                            window.location.reload();
+                                          }, 1500);
                                         } else {
-                                          // Swal.fire(
-                                          //   originalPromiseResult.message,
-                                          //   "",
-                                          //   "error"
-                                          // );
+                                          Swal.fire("Lỗi Server", "", "error");
                                         }
                                       })
                                       .catch(
@@ -339,20 +468,16 @@ const Card = ({
                                           console.log(
                                             rejectedValueOrSerializedError
                                           );
+                                          Swal.fire("Lỗi Server", "", "error");
                                         }
                                       );
                                   }
-                                },
-                              });
-
-                              // if (fruit) {
-                              //   Swal.fire(`You selected: ${fruit}`);
-                              // }
-                            }}
-                            style={{ marginRight: "12px" }}
-                          >
-                            <MDBIcon fas icon="plus-circle" />
-                          </a>
+                                });
+                              }}
+                            >
+                              <MDBIcon fas icon="minus-circle" />
+                            </a>
+                          </>
                         )}
                         {option == "bookings" && (
                           <>
@@ -385,6 +510,9 @@ const Card = ({
                                               "",
                                               "success"
                                             );
+                                            setTimeout(() => {
+                                              window.location.reload();
+                                            }, 1500);
                                           } else {
                                             Swal.fire(
                                               originalPromiseResult.message,

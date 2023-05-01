@@ -32,7 +32,7 @@ export const verticalOptions = {
   },
 };
 
-const labels = ["January"];
+const labels = ["1"];
 
 export const verticalData = {
   labels,
