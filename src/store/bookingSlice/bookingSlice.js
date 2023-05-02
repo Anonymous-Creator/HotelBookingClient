@@ -121,6 +121,19 @@ export const fetchUpdateBooking = createAsyncThunk(
   }
 );
 
+export const fetchCheckinBookingById = createAsyncThunk(
+  "booking",
+  async ({ bookingId }, thunkAPI) => {
+    try {
+      const response = await bookingService.checkinBookingById(bookingId);
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      return err.response.data;
+    }
+  }
+);
+
 export const fetchCheckoutBookingById = createAsyncThunk(
   "booking",
   async ({ bookingId }, thunkAPI) => {

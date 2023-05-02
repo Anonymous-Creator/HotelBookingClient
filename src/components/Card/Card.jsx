@@ -18,7 +18,10 @@ import {
 } from "../../store/saleSlice/saleSlice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
-import { fetchCheckoutBookingById } from "../../store/bookingSlice/bookingSlice";
+import {
+  fetchCheckinBookingById,
+  fetchCheckoutBookingById,
+} from "../../store/bookingSlice/bookingSlice";
 import BillModal from "../Modal/BillModal";
 import "./card.scss";
 
@@ -40,7 +43,6 @@ const Card = ({
   const [active, setActive] = useState([]);
 
   const callback = () => {
-    console.log("call back here");
     setDisplayModal(false);
     setStatusModal("");
     setMessageModal("");
@@ -179,7 +181,7 @@ const Card = ({
                           e.preventDefault();
                           Swal.fire({
                             title:
-                              "Bạn có chắc chắn xóa dịch vụ của tất cả các phòng đã chọn?",
+                              "Bạn có chắc chắn xóa khuyến mãi của tất cả các phòng đã chọn?",
                             text: "",
                             icon: "warning",
                             showCancelButton: true,
@@ -294,6 +296,7 @@ const Card = ({
                     </th>
                   )}
                   {keys && keys.map((key) => <th>{key}</th>)}
+                  {option == "bookings" && <th>email</th>}
                   <th style={{ width: "120px" }}>Settings</th>
                 </tr>
               </thead>
@@ -301,6 +304,7 @@ const Card = ({
                 {data &&
                   data.map((item, index) => (
                     <tr
+                      // onMouseOver={(e) => console.log("ok")}
                       className={
                         active.includes(index) && option == "rooms"
                           ? "active"
@@ -325,6 +329,10 @@ const Card = ({
                         </td>
                       )}
                       {keys && keys.map((key) => <td>{item[key]}</td>)}
+                      {option == "bookings" && (
+                        <th>{item && item.createdBy.firstName}</th>
+                      )}
+
                       <td
                         style={{
                           display: "flex",
@@ -430,7 +438,7 @@ const Card = ({
                               onClick={(e) => {
                                 e.preventDefault();
                                 Swal.fire({
-                                  title: "Bạn có chắc chắn xóa dịch vụ?",
+                                  title: "Bạn có chắc chắn xóa khuyến mãi?",
                                   text: "",
                                   icon: "warning",
                                   showCancelButton: true,
@@ -486,7 +494,7 @@ const Card = ({
                                 title="Xuât bill"
                                 onClick={() => {
                                   Swal.fire({
-                                    title: "Bạn muốn xuát bill đặt phòng này",
+                                    title: "Bạn muốn check in đặt phòng này",
                                     // showDenyButton: true,
                                     showCancelButton: true,
                                     confirmButtonText: "Save",
@@ -494,7 +502,7 @@ const Card = ({
                                     /* Read more about isConfirmed, isDenied below */
                                     if (result.isConfirmed) {
                                       const result = await dispatch(
-                                        fetchCheckoutBookingById({
+                                        fetchCheckinBookingById({
                                           bookingId: item.id,
                                         })
                                       )
@@ -506,7 +514,7 @@ const Card = ({
                                             "SUCCESS"
                                           ) {
                                             Swal.fire(
-                                              "Xuât bill thành công",
+                                              "Check in thành công",
                                               "",
                                               "success"
                                             );
@@ -544,8 +552,74 @@ const Card = ({
                                 }}
                                 className="me-3"
                               >
-                                <MDBIcon fas icon="money-bill" />
-                                {/* <img src={eye} alt="img" /> */}
+                                <MDBIcon fas icon="sign-in-alt" />
+                              </Link>
+                            )}
+
+                            {item.status == "CHECKED_IN" && (
+                              <Link
+                                title="Xuât bill"
+                                onClick={() => {
+                                  Swal.fire({
+                                    title: "Bạn muốn check out đặt phòng này",
+                                    // showDenyButton: true,
+                                    showCancelButton: true,
+                                    confirmButtonText: "Save",
+                                  }).then(async (result) => {
+                                    /* Read more about isConfirmed, isDenied below */
+                                    if (result.isConfirmed) {
+                                      const result = await dispatch(
+                                        fetchCheckoutBookingById({
+                                          bookingId: item.id,
+                                        })
+                                      )
+                                        .then(unwrapResult)
+                                        .then((originalPromiseResult) => {
+                                          console.log(originalPromiseResult);
+                                          if (
+                                            originalPromiseResult.status ==
+                                            "SUCCESS"
+                                          ) {
+                                            Swal.fire(
+                                              "Check out thành công",
+                                              "",
+                                              "success"
+                                            );
+                                            setTimeout(() => {
+                                              window.location.reload();
+                                            }, 1500);
+                                          } else {
+                                            Swal.fire(
+                                              originalPromiseResult.message,
+                                              "",
+                                              "error"
+                                            );
+                                          }
+                                        })
+                                        .catch(
+                                          (rejectedValueOrSerializedError) => {
+                                            console.log(
+                                              rejectedValueOrSerializedError
+                                            );
+                                            Swal.fire(
+                                              "Có lỗi xảy ra",
+                                              "",
+                                              "error"
+                                            );
+                                          }
+                                        );
+                                    } else if (result.isDenied) {
+                                      Swal.fire(
+                                        "Changes are not saved",
+                                        "",
+                                        "info"
+                                      );
+                                    }
+                                  });
+                                }}
+                                className="me-3"
+                              >
+                                <MDBIcon fas icon="sign-out-alt" />
                               </Link>
                             )}
 
@@ -553,7 +627,8 @@ const Card = ({
                               <Link
                                 title="Bill"
                                 style={{ marginLeft: "8px" }}
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.preventDefault();
                                   setBooking(item);
                                   setDisplayModal(true);
                                   setStatusModal("success");

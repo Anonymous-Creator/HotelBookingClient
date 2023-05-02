@@ -184,17 +184,27 @@ const BillModal = ({
                         <div className="d-flex justify-content-end">
                           <p className="text-muted me-3">Surcharges:</p>
                           <span>
-                            {booking &&
+                            {(booking &&
                               Object.keys(booking).length > 0 &&
                               booking.surcharges.length > 0 &&
+                              booking.surcharges[0] != null &&
                               booking.surcharges
                                 .reduce((total, item) => {
-                                  return total + item.roomSurcharge;
+                                  let sc = 0;
+                                  if (item) {
+                                    sc = item.roomSurcharge;
+                                  }
+                                  console.log(sc);
+                                  return total + sc;
                                 }, 0)
                                 .toLocaleString("it-IT", {
                                   style: "currency",
                                   currency: "VND",
-                                })}
+                                })) ||
+                              (0).toLocaleString("it-IT", {
+                                style: "currency",
+                                currency: "VND",
+                              })}
                           </span>
                         </div>
                         <div className="d-flex justify-content-end mt-3">
@@ -206,7 +216,11 @@ const BillModal = ({
                                 booking.totalRoomPrice +
                                 booking.totalServicePrice +
                                 booking.surcharges.reduce((total, item) => {
-                                  return total + item.roomSurcharge;
+                                  let sc = 0;
+                                  if (item) {
+                                    sc = item.roomSurcharge;
+                                  }
+                                  return total + sc;
                                 }, 0)
                               ).toLocaleString("it-IT", {
                                 style: "currency",

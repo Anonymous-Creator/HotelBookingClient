@@ -295,7 +295,16 @@ const UserManage = () => {
                     onClick={() => handleIconsClick("tab2")}
                     active={iconsActive === "tab2"}
                   >
-                    <MDBIcon fas icon="trash-alt" /> Trash
+                    {option == "users" && (
+                      <>
+                        <MDBIcon fas icon="lock" /> Lock
+                      </>
+                    )}
+                    {option != "users" && (
+                      <>
+                        <MDBIcon fas icon="trash-alt" /> Trash
+                      </>
+                    )}
                   </MDBTabsLink>
                 </MDBTabsItem>
               </MDBTabs>

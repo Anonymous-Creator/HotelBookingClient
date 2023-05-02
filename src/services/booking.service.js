@@ -69,6 +69,13 @@ class BookingService {
       `${process.env.REACT_APP_API_URL}/api/v1/booking/check-out/${bookingId}`
     );
   }
+
+  async checkinBookingById(bookingId) {
+    return await this.httpService.request(
+      "POST",
+      `${process.env.REACT_APP_API_URL}/api/v1/booking/check-in/${bookingId}`
+    );
+  }
 }
 
 export default BookingService;
