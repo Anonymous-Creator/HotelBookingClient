@@ -92,27 +92,9 @@ const BlogDetail = () => {
                 </div>
                 <div className="tag-share">
                   <div className="tags">
-                    <a href="#">Travel Trip</a>
-                    <a href="#">Camping</a>
-                    <a href="#">Event</a>
-                  </div>
-                  <div className="social-share">
-                    <span>Share:</span>
-                    <a href="#">
-                      <i className="fa fa-facebook" />
-                    </a>
-                    <a href="#">
-                      <i className="fa fa-twitter" />
-                    </a>
-                    <a href="#">
-                      <i className="fa fa-tripadvisor" />
-                    </a>
-                    <a href="#">
-                      <i className="fa fa-instagram" />
-                    </a>
-                    <a href="#">
-                      <i className="fa fa-youtube-play" />
-                    </a>
+                    <a>Travel Trip</a>
+                    <a>Camping</a>
+                    <a>Event</a>
                   </div>
                 </div>
                 {/* <div className="comment-option">
@@ -209,70 +191,6 @@ const BlogDetail = () => {
           </div>
         </div>
       </section>
-      {/* Blog Details Section End */}
-      {/* Recommend Blog Section Begin */}
-      <section className="recommend-blog-section spad">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-12">
-              <div className="section-title">
-                <h2>Recommended</h2>
-              </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-4">
-              <div
-                className="blog-item set-bg"
-                data-setbg="img/blog/blog-1.jpg"
-              >
-                <div className="bi-text">
-                  <span className="b-tag">Travel Trip</span>
-                  <h4>
-                    <a href="#">Tremblant In Canada</a>
-                  </h4>
-                  <div className="b-time">
-                    <i className="icon_clock_alt" /> 15th April, 2019
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div
-                className="blog-item set-bg"
-                data-setbg="img/blog/blog-2.jpg"
-              >
-                <div className="bi-text">
-                  <span className="b-tag">Camping</span>
-                  <h4>
-                    <a href="#">Choosing A Static Caravan</a>
-                  </h4>
-                  <div className="b-time">
-                    <i className="icon_clock_alt" /> 15th April, 2019
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div
-                className="blog-item set-bg"
-                data-setbg="img/blog/blog-3.jpg"
-              >
-                <div className="bi-text">
-                  <span className="b-tag">Event</span>
-                  <h4>
-                    <a href="#">Copper Canyon</a>
-                  </h4>
-                  <div className="b-time">
-                    <i className="icon_clock_alt" /> 21th April, 2019
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* Recommend Blog Section End */}
     </div>
   );
 };
