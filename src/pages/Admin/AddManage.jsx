@@ -9,7 +9,7 @@ import saleInterface from "../../interfaces/sales.interface";
 import roomsInterface from "../../interfaces/rooms.interface";
 import usersInterface from "../../interfaces/users.interface";
 import servicesInterface from "../../interfaces/service.interface.js";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   fetchCreateHotelServices,
   fetchGetHotelService,
@@ -532,7 +532,9 @@ const AddUser = () => {
                   >
                     Submit
                   </button>
-                  <button className="btn btn-cancel">Cancel</button>
+                  <Link className="btn btn-cancel" to={"/admin/" + option}>
+                    Cancel
+                  </Link>
                 </div>
               </div>
             </div>

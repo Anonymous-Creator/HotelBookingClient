@@ -41,7 +41,7 @@ const RoomDetail = () => {
         .then(unwrapResult)
         .then((originalPromiseResult) => {
           setRoomRating(originalPromiseResult.data.items);
-          // console.log(originalPromiseResult.data.items);
+          console.log(originalPromiseResult.data.items);
         })
         .catch((rejectedValueOrSerializedError) => {
           console.log(rejectedValueOrSerializedError);
@@ -98,15 +98,14 @@ const RoomDetail = () => {
         // setComment((prev) => [...prev, originalPromiseResult.data]);
         setStar("");
         setComment("");
-        console.log(star);
-        console.log(comment);
+        // console.log(originalPromiseResult);
+        setRoomRating([...roomRating, originalPromiseResult.data]);
         // console.log(originalPromiseResult);
       })
       .catch((rejectedValueOrSerializedError) => {
         console.log(rejectedValueOrSerializedError);
         // handle result here
       });
-    console.log(star, comment);
   };
 
   return (

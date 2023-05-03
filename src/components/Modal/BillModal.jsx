@@ -26,9 +26,8 @@ const BillModal = ({
     const imgProperties = pdf.getImageProperties(data);
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
-
-    pdf.addImage(data, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save("print.pdf");
+    pdf.addImage(data, "PNG", 0, 0, pdfWidth, 300);
+    pdf.save("bill.pdf");
   };
 
   useEffect(() => {
@@ -42,11 +41,11 @@ const BillModal = ({
 
   return (
     <div>
-      {/* Modal HTML */}
       <div
         style={{
           display: display ? "block" : "none",
           overflowX: "scroll",
+          // position: "relative",
         }}
         id="myModal"
         className={"modal" + " fade " + (display ? "show" : "")}
@@ -56,6 +55,18 @@ const BillModal = ({
             className="modal-content"
             style={{ height: "600px", overflowX: "scroll" }}
           >
+            <button
+              style={{ color: "black", fontSize: "30px" }}
+              type="button"
+              className="close"
+              data-dismiss="modal"
+              aria-hidden="true"
+              onClick={() => {
+                callback();
+              }}
+            >
+              ×
+            </button>
             <div className="container mt-6 mb-7">
               <div className="row justify-content-center">
                 <div className="">
@@ -275,19 +286,6 @@ const BillModal = ({
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="modal-body text-center">
-              <Link
-                // to={"/admin/bookings"}
-                className="btn btn-success"
-                data-dismiss="modal"
-                onClick={(e) => {
-                  e.preventDefault();
-                  callback();
-                }}
-              >
-                <span>Quay lại</span>
-              </Link>
             </div>
           </div>
         </div>

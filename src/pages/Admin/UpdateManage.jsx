@@ -13,7 +13,7 @@ import salesInterface from "../../interfaces/sales.interface";
 import roomsInterface from "../../interfaces/rooms.interface";
 import usersInterface from "../../interfaces/users.interface";
 import servicesInterface from "../../interfaces/service.interface.js";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   fetchGetHotelService,
   fetchUpdateHotelService,
@@ -443,7 +443,7 @@ const UpdateManage = () => {
                             onChange={(e) => {
                               setData((prevState) => {
                                 prevState["thumbnailFile"] = e.target.files[0];
-                                prevState["thumbnail"] = null;
+                                prevState["thumbnail"] = "";
                                 setVirtualOldImg(
                                   URL.createObjectURL(e.target.files[0])
                                 );
@@ -536,7 +536,10 @@ const UpdateManage = () => {
                   >
                     Update
                   </button>
-                  <button className="btn btn-cancel">Cancel</button>
+                  <Link className="btn btn-cancel" to={"/admin/" + option}>
+                    Cancel
+                  </Link>
+                  {/* <button className="btn btn-cancel"></button> */}
                 </div>
               </div>
             </div>

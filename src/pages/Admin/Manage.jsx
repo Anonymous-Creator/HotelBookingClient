@@ -89,7 +89,6 @@ const UserManage = () => {
   let { option, optionId } = useParams();
 
   useEffect(() => {
-    setPageNum(1);
     (async () => {
       let func;
       if (option == "rooms") {

@@ -55,11 +55,11 @@ export const fetchCreateProduct = createAsyncThunk(
 
 export const fetchUpdateProduct = createAsyncThunk(
   "product",
-  async ({ productId, updateServiceDto }, thunkAPI) => {
+  async ({ productId, productUpdateDto }, thunkAPI) => {
     try {
       const response = await productService.updateProductById(
         productId,
-        updateServiceDto
+        productUpdateDto
       );
       return response.data;
     } catch (err) {
