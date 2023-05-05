@@ -69,6 +69,11 @@ const UserManage = () => {
   const [deleteFlag, setDeleteFlag] = useState(false);
   const [pageNum, setPageNum] = useState(1);
   const [pageTotal, setPageTotal] = useState(1);
+  const [keyword, setKeyword] = useState("");
+
+  const callbackKeyWord = (keyword) => {
+    setKeyword(keyword);
+  };
 
   const handleIconsClick = (value) => {
     if (value === iconsActive) {
@@ -89,28 +94,29 @@ const UserManage = () => {
   let { option, optionId } = useParams();
 
   useEffect(() => {
+    console.log(keyword);
     (async () => {
       let func;
       if (option == "rooms") {
-        func = fetchGetRooms({ deleteFlag, pageNum });
+        func = fetchGetRooms({ deleteFlag, pageNum, keyword });
         setKeys([...Object.keys(roomsInterface)]);
       } else if (option == "sales") {
-        func = fetchGetSales({ deleteFlag, pageNum });
+        func = fetchGetSales({ deleteFlag, pageNum, keyword });
         setKeys([...Object.keys(saleInterface)]);
       } else if (option == "users") {
-        func = fetchGetUsers({ isLocked: deleteFlag, pageNum });
+        func = fetchGetUsers({ isLocked: deleteFlag, pageNum, keyword });
         setKeys([...Object.keys(usersInterface)]);
       } else if (option == "services") {
-        func = fetchGetHotelServicesAdmin({ deleteFlag, pageNum });
+        func = fetchGetHotelServicesAdmin({ deleteFlag, pageNum, keyword });
         setKeys([...Object.keys(servicesInterface)]);
       } else if (option == "products") {
-        func = fetchGetProductsAdmin({ deleteFlag, pageNum });
+        func = fetchGetProductsAdmin({ deleteFlag, pageNum, keyword });
         setKeys([...Object.keys(productInterface)]);
       } else if (option == "posts") {
-        func = fetchGetPostsAdmin({ deleteFlag, pageNum });
+        func = fetchGetPostsAdmin({ deleteFlag, pageNum, keyword });
         setKeys([...Object.keys(postInterface)]);
       } else if (option == "bookings") {
-        func = fetchGetBookingsAdmin({ deleteFlag, pageNum });
+        func = fetchGetBookingsAdmin({ deleteFlag, pageNum, keyword });
         setKeys([...Object.keys(bookingInterface)]);
       }
       const result = await dispatch(func)
@@ -140,7 +146,7 @@ const UserManage = () => {
           console.log(rejectedValueOrSerializedError);
         });
     })();
-  }, [option, deleteFlag, pageNum]);
+  }, [option, deleteFlag, pageNum, keyword]);
 
   const deleteOption = async (id) => {
     console.log(id);
@@ -316,6 +322,7 @@ const UserManage = () => {
                     keys={keys}
                     deleteOption={deleteOption}
                     deleteFlag={deleteFlag}
+                    callbackKeyWord={callbackKeyWord}
                   />
                 </MDBTabsPane>
                 <MDBTabsPane show={iconsActive === "tab2"}>

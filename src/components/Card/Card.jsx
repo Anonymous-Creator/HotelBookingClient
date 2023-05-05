@@ -32,6 +32,7 @@ const Card = ({
   deleteOption,
   revertOption,
   deleteFlag,
+  callbackKeyWord,
 }) => {
   const dispatch = useDispatch();
   const [displayModal, setDisplayModal] = useState(false);
@@ -81,6 +82,9 @@ const Card = ({
                   <label>
                     {" "}
                     <input
+                      onChange={(e) => {
+                        callbackKeyWord(e.target.value);
+                      }}
                       type="search"
                       className="form-control form-control-sm"
                       placeholder="Search..."
